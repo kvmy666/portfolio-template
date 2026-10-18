@@ -1,0 +1,39 @@
+{
+  "slug": "demo-project-three",
+  "demo": true,
+  "name": { "en": "Demo Project Three", "ar": "مشروع تجريبي ثلاثة" },
+  "summary": {
+    "en": "A sample cross-platform tool with a compact feature list.",
+    "ar": "أداة تجريبية متعددة المنصات بقائمة ميزات مختصرة."
+  },
+  "description": {
+    "en": "A third placeholder project for the template. It demonstrates a cross-platform card and a short description.",
+    "ar": "مشروع نموذجي ثالث للقالب. يعرض بطاقة متعددة المنصات ووصفًا مختصرًا."
+  },
+  "order": 3,
+  "platform": "cross-platform",
+  "tech": ["TypeScript", "Rust"],
+  "features": [
+    {
+      "title": { "en": "Shared core", "ar": "نواة مشتركة" },
+      "description": {
+        "en": "One tested core serves every platform target.",
+        "ar": "نواة واحدة مختبرة تخدم كل منصات الاستهداف."
+      },
+      "tags": ["Testing"]
+    },
+    {
+      "title": { "en": "Measured performance", "ar": "أداء مقاس" },
+      "description": {
+        "en": "Budget checks keep the interface responsive.",
+        "ar": "فحوص الميزانية تحافظ على استجابة الواجهة."
+      },
+      "tags": ["Performance"]
+    }
+  ],
+  "metrics": null,
+  "repo": null,
+  "store": null,
+  "packageId": null,
+  "logo": "/demo/logo-3.svg"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Your Name",
+  "role": { "en": "Software Engineer" },
+  "pitch": { "en": "I build fast, accessible products for the web and Android." },
+  "email": "you@example.com",
+  "links": {
+    "github": "https://github.com/your-handle",
+    "linkedin": "https://linkedin.com/in/your-handle",
+    "website": null
+  },
+  "defaultLocale": "en",
+  "locales": [
+    { "code": "en", "label": "English", "dir": "ltr", "htmlLang": "en" },
+    { "code": "ar", "label": "العربية", "dir": "rtl", "htmlLang": "ar" }
+  ],
+  "features": {
+    "cv": true,
+    "contact": true,
+    "metrics": true,
+    "splash3d": true,
+    "laptop": true
+  },
+  "contact": {
+    "recipient": "you@example.com",
+    "labels": { "en": ["Coop training"], "ar": ["تدريب تعاوني"] }
+  }
+}

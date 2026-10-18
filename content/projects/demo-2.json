@@ -1,0 +1,39 @@
+{
+  "slug": "demo-project-two",
+  "demo": true,
+  "name": { "en": "Demo Project Two", "ar": "مشروع تجريبي اثنان" },
+  "summary": {
+    "en": "A sample Android app entry for the projects grid.",
+    "ar": "إدخال تطبيق أندرويد تجريبي في شبكة المشاريع."
+  },
+  "description": {
+    "en": "A second placeholder project with an Android focus. Use it to check platform labels, tech chips, and feature tags.",
+    "ar": "مشروع نموذجي ثانٍ يركز على أندرويد. استخدمه لفحص تسميات المنصات وشرائح التقنيات ووسوم الميزات."
+  },
+  "order": 2,
+  "platform": "android",
+  "tech": ["Kotlin", "Jetpack Compose"],
+  "features": [
+    {
+      "title": { "en": "Offline-first flow", "ar": "تجربة تعمل دون اتصال" },
+      "description": {
+        "en": "Core screens remain useful without a connection.",
+        "ar": "تبقى الشاشات الأساسية مفيدة دون اتصال بالشبكة."
+      },
+      "tags": ["UX", "Performance"]
+    },
+    {
+      "title": { "en": "Intentional permissions", "ar": "أذونات مدروسة" },
+      "description": {
+        "en": "Every permission maps to a visible product need.",
+        "ar": "كل إذن مرتبط بحاجة واضحة في المنتج."
+      },
+      "tags": ["Security"]
+    }
+  ],
+  "metrics": null,
+  "repo": null,
+  "store": null,
+  "packageId": null,
+  "logo": "/demo/logo-2.svg"
+}
