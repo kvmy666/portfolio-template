@@ -1,0 +1,26 @@
+name: Template smoke
+on: [pull_request]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - projects: 0
+            langs: en
+          - projects: 3
+            langs: en
+          - projects: 3
+            langs: en,ar
+          - projects: 6
+            langs: en,es
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/setup.mjs --yes --projects=${{ matrix.projects }} --langs=${{ matrix.langs }}
+      - run: npm run build
