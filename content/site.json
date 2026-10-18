@@ -1,7 +1,7 @@
 {
   "name": "Your Name",
-  "role": { "en": "Software Engineer" },
-  "pitch": { "en": "I build fast, accessible products for the web and Android." },
+  "role": { "en": "Software Engineer", "ar": "مهندس برمجيات" },
+  "pitch": { "en": "I build fast, accessible products for the web and Android.", "ar": "أبني منتجات سريعة وسهلة الوصول للويب وAndroid." },
   "email": "you@example.com",
   "links": {
     "github": "https://github.com/your-handle",

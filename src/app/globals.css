@@ -21,6 +21,7 @@
   --radius-full: 999px;
 
   --measure: 65ch;
+  --dock-space: 0px;
 }
 
 [data-theme="light"] {
@@ -61,6 +62,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-bottom: var(--dock-space);
     background: var(--background);
   }
 
@@ -162,14 +164,26 @@
   padding-bottom: 6rem;
 }
 
+.page-footer {
+  padding-bottom: 2rem;
+}
+
 @media (max-width: 750px) {
+  :root {
+    --dock-space: calc(6rem + env(safe-area-inset-bottom));
+  }
+
   .page-main {
     padding-top: 3rem;
-    padding-bottom: 8rem;
+    padding-bottom: calc(var(--dock-space) + 2rem);
   }
 
   [id] {
-    scroll-margin-bottom: 6.5rem;
+    scroll-margin-bottom: calc(var(--dock-space) + 1rem);
+  }
+
+  .page-footer {
+    padding-bottom: calc(var(--dock-space) + 1.5rem);
   }
 }
 

@@ -244,6 +244,8 @@ export const LocaleStringsSchema = z.strictObject({
   }),
   hero: z.strictObject({
     aboutMe: z.string().min(1),
+    portfolio: z.string().min(1),
+    demo: z.string().min(1),
   }),
   projects: z.strictObject({
     empty: z.string().min(1),

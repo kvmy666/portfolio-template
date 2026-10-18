@@ -54,7 +54,11 @@ const DEFAULT_EN_STRINGS = {
     projects: "Projects",
     contact: "Contact",
   },
-  hero: { aboutMe: "About me" },
+  hero: {
+    aboutMe: "About me",
+    portfolio: "Portfolio",
+    demo: "Demo",
+  },
   projects: {
     empty: "Projects are coming soon.",
     emptyHint: "Add JSON files under content/projects to fill this grid.",

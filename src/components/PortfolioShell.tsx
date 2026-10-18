@@ -203,10 +203,10 @@ function PortfolioContent({
                     <div className="hero-card-grid absolute inset-0 opacity-40" />
                     <div className="relative flex items-center justify-between">
                       <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em]">
-                        {t.visual.portfolio}
+                        {t.hero.portfolio}
                       </span>
                       <span className="text-xs text-white/70">
-                        {t.visual.demo}
+                        {t.hero.demo}
                       </span>
                     </div>
                     <div className="relative mt-16 flex h-24 w-24 items-center justify-center rounded-lg border border-white/30 bg-white/15 text-3xl font-semibold backdrop-blur">
@@ -509,7 +509,7 @@ function PortfolioContent({
       </main>
 
       <footer className="border-t border-line/70">
-        <div className="page-container flex flex-col gap-2 py-8 pb-28 text-sm text-muted sm:flex-row sm:items-center sm:justify-between md:pb-8">
+        <div className="page-container page-footer flex flex-col gap-2 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} {site.name}. {t.footer.rights}
           </p>
