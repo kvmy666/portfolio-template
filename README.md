@@ -8,7 +8,8 @@ content and assets.
 
 ## Features
 
-- Single-page layout with a sticky header and a mobile dock
+- Single-page layout with a vertical desktop dock and a mobile bottom bar
+- Floating theme and locale controls with no page reload
 - Projects from 0 to N, read from `content/projects/*.json`
 - English-only or any locale, with right-to-left support
 - 3D hero card and a scroll-driven laptop scrub visual
@@ -107,7 +108,9 @@ Set any flag to `false` to remove that part of the page:
 ### Locales
 
 The demo ships English and Arabic. Locale metadata drives `lang` and `dir` on
-the document. Add a locale to `content/site.json`, create a matching
+the document. The floating theme and locale controls apply changes without a
+full page reload and remember the choice in local storage. Add a locale to
+`content/site.json`, create a matching
 `content/locales/<code>.json`, and set `dir` to `rtl` when needed. The setup
 wizard creates new dictionary files by copying English and adding a `_todo`
 marker.
@@ -169,7 +172,8 @@ the static-export decision is accepted.
 Code is licensed under the MIT License. See `LICENSE`.
 
 Demo assets are original generated SVG artwork dedicated to the public domain
-under CC0. No third-party fonts, logos, screenshots, or media are bundled. See
+under CC0. Fonts are fetched at build time from Google Fonts under the SIL Open
+Font License. No third-party logos, screenshots, or media are bundled. See
 `NOTICE` for asset details.
 
 Copyright (c) 2026 Abdulkarim.
