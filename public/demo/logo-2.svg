@@ -7,6 +7,6 @@
     </linearGradient>
   </defs>
   <rect width="96" height="96" rx="24" fill="url(#demo-logo-two-gradient)"/>
-  <path d="M48 18 78 66H18Z" fill="#fbbf24"/>
+  <path d="M48 18 78 66H18Z" fill="#00b13f"/>
   <circle cx="48" cy="52" r="9" fill="#18181b"/>
 </svg>

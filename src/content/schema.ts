@@ -247,12 +247,61 @@ export const LocaleStringsSchema = z.strictObject({
   }),
   projects: z.strictObject({
     empty: z.string().min(1),
+    emptyHint: z.string().min(1),
+    countOne: z.string().min(1),
+    countMany: z.string().min(1),
+    title: z.string().min(1),
+    demo: z.string().min(1),
+    repository: z.string().min(1),
+    store: z.string().min(1),
+  }),
+  platforms: z.strictObject({
+    web: z.string().min(1),
+    android: z.string().min(1),
+    ios: z.string().min(1),
+    crossPlatform: z.string().min(1),
+  }),
+  tags: z.strictObject({
+    UX: z.string().min(1),
+    Security: z.string().min(1),
+    Testing: z.string().min(1),
+    Performance: z.string().min(1),
+  }),
+  metrics: z.strictObject({
+    title: z.string().min(1),
+    github: z.string().min(1),
+    mirror: z.string().min(1),
+  }),
+  cv: z.strictObject({
+    title: z.string().min(1),
+    body: z.string().min(1),
+    request: z.string().min(1),
+    action: z.string().min(1),
   }),
   contact: z.strictObject({
     submit: z.string().min(1),
+    title: z.string().min(1),
+    subjectFallback: z.string().min(1),
   }),
   footer: z.strictObject({
     rights: z.string().min(1),
+    builtWith: z.string().min(1),
+  }),
+  visual: z.strictObject({
+    portfolio: z.string().min(1),
+    demo: z.string().min(1),
+  }),
+  ui: z.strictObject({
+    skipToContent: z.string().min(1),
+    primaryNav: z.string().min(1),
+    language: z.string().min(1),
+    changeLanguage: z.string().min(1),
+    siteControls: z.string().min(1),
+    theme: z.string().min(1),
+    switchToLight: z.string().min(1),
+    switchToDark: z.string().min(1),
+    email: z.string().min(1),
+    website: z.string().min(1),
   }),
 });
 

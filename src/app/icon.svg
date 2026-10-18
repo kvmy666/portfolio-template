@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="portfolio-icon-title">
   <title id="portfolio-icon-title">Portfolio template icon</title>
-  <rect width="32" height="32" rx="8" fill="#4f46e5"/>
-  <path d="M16 6 26 16 16 26 6 16Z" fill="#ffffff" opacity="0.92"/>
-  <circle cx="16" cy="16" r="4" fill="#4f46e5"/>
+  <rect width="32" height="32" rx="8" fill="#00b13f"/>
+  <path d="M16 6 26 16 16 26 6 16Z" fill="#ffffff" opacity="0.94"/>
+  <circle cx="16" cy="16" r="4" fill="#04170c"/>
 </svg>

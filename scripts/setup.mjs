@@ -55,9 +55,64 @@ const DEFAULT_EN_STRINGS = {
     contact: "Contact",
   },
   hero: { aboutMe: "About me" },
-  projects: { empty: "Projects are coming soon." },
-  contact: { submit: "Send message" },
-  footer: { rights: "All rights reserved." },
+  projects: {
+    empty: "Projects are coming soon.",
+    emptyHint: "Add JSON files under content/projects to fill this grid.",
+    countOne: "{count} project",
+    countMany: "{count} projects",
+    title: "Selected work",
+    demo: "Demo",
+    repository: "Repository",
+    store: "Store",
+  },
+  platforms: {
+    web: "Web",
+    android: "Android",
+    ios: "iOS",
+    crossPlatform: "Cross-platform",
+  },
+  tags: {
+    UX: "UX",
+    Security: "Security",
+    Testing: "Testing",
+    Performance: "Performance",
+  },
+  metrics: {
+    title: "Live metrics",
+    github: "GitHub stars",
+    mirror: "Mirror downloads",
+  },
+  cv: {
+    title: "Curriculum Vitae",
+    body: "Request a copy of my CV and I will send it to you.",
+    request: "Request CV",
+    action: "Request a copy",
+  },
+  contact: {
+    submit: "Send message",
+    title: "Start a conversation",
+    subjectFallback: "Hello",
+  },
+  footer: {
+    rights: "All rights reserved.",
+    builtWith: "Built with Next.js. Demo assets are generated.",
+  },
+  visual: {
+    portfolio: "Portfolio",
+    demo: "Demo",
+  },
+  ui: {
+    skipToContent: "Skip to content",
+    primaryNav: "Primary",
+    language: "Language",
+    changeLanguage: "Change language",
+    siteControls: "Site controls",
+    theme: "Theme",
+    switchToLight: "Switch to light theme",
+    switchToDark: "Switch to dark theme",
+    email: "Email",
+    website: "Website",
+  },
 };
 
 const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--force]
@@ -679,6 +734,39 @@ function syncProjects(target, options) {
   }
 }
 
+function removeStaleLocaleFiles(codes) {
+  if (!fs.existsSync(localesDirectory)) {
+    return;
+  }
+
+  const selected = new Set(codes);
+
+  for (const fileName of fs.readdirSync(localesDirectory)) {
+    if (!fileName.endsWith(".json")) {
+      continue;
+    }
+
+    const code = fileName.slice(0, -".json".length);
+    if (code === "en" || selected.has(code)) {
+      continue;
+    }
+
+    if (!/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(code)) {
+      continue;
+    }
+
+    const filePath = path.join(localesDirectory, fileName);
+    if (!fs.statSync(filePath).isFile()) {
+      continue;
+    }
+
+    fs.unlinkSync(filePath);
+    console.log(
+      `Removed ${relativePath(filePath)} because it is not in the selected locales.`,
+    );
+  }
+}
+
 function ensureLocaleFiles(codes) {
   const englishPath = path.join(localesDirectory, "en.json");
   const englishStrings = fs.existsSync(englishPath)
@@ -689,6 +777,8 @@ function ensureLocaleFiles(codes) {
     writeJson(englishPath, englishStrings);
     console.log("Created content/locales/en.json");
   }
+
+  removeStaleLocaleFiles(codes);
 
   for (const code of codes) {
     if (code === "en") {

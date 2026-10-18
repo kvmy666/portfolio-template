@@ -14,6 +14,10 @@
     "size": "size-limit",
     "knip": "knip",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build && node scripts/check-privacy.mjs",
+    "verify:fast": "npm run typecheck && npm run lint && npm test && npm run knip && node scripts/check-privacy.mjs",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:visual": "playwright test --grep @visual",
+    "test:fps": "playwright test --grep @fps",
     "lighthouse": "lhci autorun"
   },
   "dependencies": {

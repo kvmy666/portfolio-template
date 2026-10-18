@@ -10,12 +10,61 @@
     "aboutMe": "نبذة عني"
   },
   "projects": {
-    "empty": "لا توجد مشاريع بعد."
+    "empty": "لا توجد مشاريع بعد.",
+    "emptyHint": "أضف ملفات JSON داخل content/projects لملء هذه الشبكة.",
+    "countOne": "مشروع واحد",
+    "countMany": "{count} مشاريع",
+    "title": "أعمال مختارة",
+    "demo": "تجريبي",
+    "repository": "المستودع",
+    "store": "المتجر"
+  },
+  "platforms": {
+    "web": "ويب",
+    "android": "أندرويد",
+    "ios": "iOS",
+    "crossPlatform": "متعدد المنصات"
+  },
+  "tags": {
+    "UX": "تجربة المستخدم",
+    "Security": "الأمان",
+    "Testing": "الاختبار",
+    "Performance": "الأداء"
+  },
+  "metrics": {
+    "title": "مؤشرات مباشرة",
+    "github": "نجوم GitHub",
+    "mirror": "تنزيلات المرآة"
+  },
+  "cv": {
+    "title": "السيرة الذاتية",
+    "body": "اطلب نسخة من سيرتي الذاتية وسأرسلها إليك.",
+    "request": "اطلب السيرة الذاتية",
+    "action": "اطلب نسخة"
   },
   "contact": {
-    "submit": "إرسال رسالة"
+    "submit": "إرسال رسالة",
+    "title": "لنبدأ حديثًا",
+    "subjectFallback": "مرحبًا"
   },
   "footer": {
-    "rights": "جميع الحقوق محفوظة."
+    "rights": "جميع الحقوق محفوظة.",
+    "builtWith": "مبني باستخدام Next.js. الأصول التجريبية مُنشأة."
+  },
+  "visual": {
+    "portfolio": "معرض الأعمال",
+    "demo": "تجريبي"
+  },
+  "ui": {
+    "skipToContent": "انتقل إلى المحتوى",
+    "primaryNav": "التنقل الرئيسي",
+    "language": "اللغة",
+    "changeLanguage": "تغيير اللغة",
+    "siteControls": "أدوات الموقع",
+    "theme": "المظهر",
+    "switchToLight": "التبديل إلى المظهر الفاتح",
+    "switchToDark": "التبديل إلى المظهر الداكن",
+    "email": "البريد",
+    "website": "الموقع"
   }
 }

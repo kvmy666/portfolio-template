@@ -9,8 +9,13 @@ The SVG files in public/demo/ and the application icon at src/app/icon.svg are
 original generated artwork created for this template. They are dedicated to the
 public domain under CC0 1.0.
 
-No third-party fonts, logos, screenshots, or media are bundled with this
-template. The demo persona and project entries are fictional.
+Fonts
+Space Grotesk, Inter, and IBM Plex Sans Arabic are provided by Google Fonts and
+licensed under the SIL Open Font License 1.1 (OFL). They are fetched and
+subset at build time through next/font.
+
+No third-party logos, screenshots, or media are bundled with this template.
+The demo persona and project entries are fictional.
 
 Attribution
 Attribution is appreciated when you reuse substantial portions of the template,
