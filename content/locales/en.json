@@ -1,0 +1,21 @@
+{
+  "_meta": "Demo UI strings. Replace these with your own copy.",
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "projects": "Projects",
+    "contact": "Contact"
+  },
+  "hero": {
+    "aboutMe": "About me"
+  },
+  "projects": {
+    "empty": "Projects are coming soon."
+  },
+  "contact": {
+    "submit": "Send message"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}

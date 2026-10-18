@@ -1,0 +1,28 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/app/**/*.{ts,tsx}",
+    "src/**/*.test.ts",
+    "tests/**/*.ts",
+    "scripts/*.mjs",
+    "lighthouserc.js"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "tests/**/*.ts",
+    "scripts/*.mjs",
+    "*.{ts,js}"
+  ],
+  "ignoreDependencies": [
+    "@axe-core/playwright",
+    "@testing-library/jest-dom",
+    "@testing-library/react",
+    "prettier",
+    "tailwindcss"
+  ],
+  "ignoreIssues": {
+    "src/content/schema.ts": ["exports", "types"],
+    "src/content/projects.server.ts": ["exports"],
+    "src/i18n/index.ts": ["exports"]
+  }
+}

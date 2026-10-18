@@ -1,0 +1,39 @@
+{
+  "slug": "demo-project-one",
+  "demo": true,
+  "name": { "en": "Demo Project One", "ar": "مشروع تجريبي واحد" },
+  "summary": {
+    "en": "A sample web product used to demonstrate the portfolio layout.",
+    "ar": "منتج ويب تجريبي يُستخدم لعرض تخطيط معرض الأعمال."
+  },
+  "description": {
+    "en": "This placeholder project shows how project cards, feature tags, and links appear. Replace it with your own work.",
+    "ar": "يعرض هذا المشروع النموذجي شكل بطاقات المشاريع ووسوم الميزات والروابط. استبدله بعملك."
+  },
+  "order": 1,
+  "platform": "web",
+  "tech": ["TypeScript", "Next.js", "Tailwind CSS"],
+  "features": [
+    {
+      "title": { "en": "Fast by default", "ar": "سريع افتراضيًا" },
+      "description": {
+        "en": "Server-rendered pages keep the first view quick.",
+        "ar": "صفحات تُعرض من الخادم تحافظ على سرعة العرض الأول."
+      },
+      "tags": ["Performance", "UX"]
+    },
+    {
+      "title": { "en": "Accessible interactions", "ar": "تفاعلات سهلة الوصول" },
+      "description": {
+        "en": "Keyboard and screen-reader paths are part of the design.",
+        "ar": "مسارات لوحة المفاتيح وقارئات الشاشة جزء من التصميم."
+      },
+      "tags": ["UX", "Testing"]
+    }
+  ],
+  "metrics": null,
+  "repo": null,
+  "store": null,
+  "packageId": null,
+  "logo": "/demo/logo-1.svg"
+}
