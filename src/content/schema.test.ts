@@ -12,6 +12,7 @@ type SiteFixture = {
   role: Record<string, string>;
   pitch: Record<string, string>;
   email: string;
+  url: string;
   links: {
     github: string | null;
     linkedin: string | null;
@@ -29,6 +30,9 @@ type SiteFixture = {
   contact: {
     recipient: string;
     labels: Record<string, string[]>;
+  };
+  cv: {
+    file: string | null;
   };
   hero: {
     photo: string | null;
@@ -125,7 +129,64 @@ describe("SiteConfigSchema", () => {
       expect(result.data.name).toBe(siteJson.name);
       expect(result.data.defaultLocale).toBe(siteJson.defaultLocale);
       expect(result.data.locales).toHaveLength(siteJson.locales.length);
+      expect(result.data.url).toBe(siteJson.url);
+      expect(result.data.cv.file).toBe(siteJson.cv.file);
     }
+  });
+
+  it("rejects an invalid site URL", () => {
+    const fixture = validSite();
+    fixture.url = "example.com";
+
+    const result = SiteConfigSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["url"],
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("accepts a null CV file or an absolute CV path", () => {
+    const noFile = validSite();
+    noFile.cv.file = null;
+    expect(SiteConfigSchema.safeParse(noFile).success).toBe(true);
+
+    const withFile = validSite();
+    withFile.cv.file = "/cv/example.pdf";
+    expect(SiteConfigSchema.safeParse(withFile).success).toBe(true);
+  });
+
+  it("rejects a relative CV path", () => {
+    const fixture = validSite();
+    fixture.cv.file = "demo/cv.pdf";
+
+    const result = SiteConfigSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["cv", "file"],
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("rejects unknown CV keys", () => {
+    const result = SiteConfigSchema.safeParse({
+      ...validSite(),
+      cv: { file: "/demo/cv.pdf", template: true },
+    });
+
+    expect(result.success).toBe(false);
   });
 
   it("rejects role content without the default locale key", () => {

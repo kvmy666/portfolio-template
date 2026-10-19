@@ -28,9 +28,10 @@ The wizard asks for:
 2. Your role
 3. How many projects you have (0-50)
 4. Whether you want English only or English plus another language
-5. Your contact email
+5. Your contact email and public site URL
 6. Optional GitHub and LinkedIn URLs
-7. Which feature flags to enable
+7. A CV PDF path (or `-` to clear it)
+8. Which feature flags to enable
 
 It writes `content/site.json`, creates demo project stubs, and creates a
 translated-locale placeholder file when you add a second language.
@@ -52,11 +53,14 @@ Supported flags:
 | `--langs=en,es` | English plus Spanish |
 | `--name=NAME` | Override the display name |
 | `--email=EMAIL` | Override the contact email |
+| `--url=URL` | Override the public site URL |
+| `--cv=/path` | CV PDF site path (blank clears it) |
 | `--force` | Allow replacing a real project at a `demo-*.json` path |
 
-The wizard is non-destructive by default. It preserves existing site values,
-never overwrites a project with `"demo": false`, and does not delete real
-projects. Running it again with the same options is safe.
+The wizard is non-destructive by default. It preserves existing site values
+(including `url` and `cv.file`), never overwrites a project with
+`"demo": false`, and does not delete real projects. Running it again with the
+same options is safe.
 
 ## Start the development server
 

@@ -30,10 +30,33 @@ export async function generateMetadata({
 
   const name = localized(project.name, siteConfig.defaultLocale);
   const summary = localized(project.summary, siteConfig.defaultLocale);
+  const title = `${name} — ${siteConfig.name}`;
+  const socialImage = {
+    url: "/opengraph-image",
+    width: 1200,
+    height: 630,
+    alt: title,
+  };
 
   return {
-    title: `${name} — ${siteConfig.name}`,
+    title,
     description: summary,
+    alternates: {
+      canonical: `/projects/${slug}`,
+    },
+    openGraph: {
+      type: "article",
+      title,
+      description: summary,
+      url: `${siteConfig.url.replace(/\/$/, "")}/projects/${slug}`,
+      images: [socialImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: summary,
+      images: [socialImage],
+    },
   };
 }
 

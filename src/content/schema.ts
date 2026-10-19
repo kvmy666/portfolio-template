@@ -41,6 +41,14 @@ const ContactSchema = z.strictObject({
   labels: z.record(localeCodeSchema, z.array(z.string().trim().min(1)).min(1)),
 });
 
+const CvSchema = z.strictObject({
+  file: z
+    .string()
+    .trim()
+    .regex(/^\//, "CV paths must start with /")
+    .nullable(),
+});
+
 const HeroSchema = z.strictObject({
   photo: z
     .string()
@@ -107,11 +115,13 @@ export const SiteConfigSchema = z
     role: LocalizedStringSchema,
     pitch: LocalizedStringSchema,
     email: z.email(),
+    url: z.url(),
     links: LinksSchema,
     defaultLocale: localeCodeSchema,
     locales: z.array(LocaleConfigSchema).min(1),
     features: FeatureFlagsSchema,
     contact: ContactSchema,
+    cv: CvSchema,
     hero: HeroSchema,
     about: AboutSchema,
   })
@@ -370,6 +380,8 @@ export const LocaleStringsSchema = z.strictObject({
     deepDive: z.string().min(1),
     lenses: z.string().min(1),
     all: z.string().min(1),
+    emptyLens: z.string().min(1),
+    openInNewTab: z.string().min(1),
     evidence: z.string().min(1),
     noMedia: z.string().min(1),
     github: z.string().min(1),
@@ -401,11 +413,30 @@ export const LocaleStringsSchema = z.strictObject({
     body: z.string().min(1),
     request: z.string().min(1),
     action: z.string().min(1),
+    view: z.string().min(1),
+    download: z.string().min(1),
+    openInNewTab: z.string().min(1),
+    close: z.string().min(1),
+    preview: z.string().min(1),
   }),
   contact: z.strictObject({
     submit: z.string().min(1),
+    sending: z.string().min(1),
     title: z.string().min(1),
     subjectFallback: z.string().min(1),
+    name: z.string().min(1),
+    email: z.string().min(1),
+    label: z.string().min(1),
+    message: z.string().min(1),
+    company: z.string().min(1),
+    success: z.string().min(1),
+    error: z.string().min(1),
+    errors: z.strictObject({
+      name: z.string().min(1),
+      email: z.string().min(1),
+      label: z.string().min(1),
+      message: z.string().min(1),
+    }),
   }),
   footer: z.strictObject({
     rights: z.string().min(1),

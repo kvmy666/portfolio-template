@@ -11,6 +11,7 @@ const MAX_DEVICE_PIXEL_RATIO = 2;
 type LaptopScrubProps = {
   frames: string[] | null;
   intro: string;
+  mark: string;
   pinTarget: RefObject<HTMLElement | null>;
 };
 
@@ -43,7 +44,7 @@ function nearestReadyFrame(images: FrameImage[], index: number): FrameImage | nu
   return null;
 }
 
-export function LaptopScrub({ frames, intro, pinTarget }: LaptopScrubProps) {
+export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameList = frames && frames.length > 0 ? frames : null;
@@ -437,7 +438,7 @@ export function LaptopScrub({ frames, intro, pinTarget }: LaptopScrubProps) {
                 </div>
               </div>
               <div className="laptop-css-face laptop-css-face-back">
-                <span className="laptop-css-mark">PORTFOLIO</span>
+                <span className="laptop-css-mark">{mark}</span>
               </div>
             </div>
             <div className="laptop-css-base">

@@ -180,6 +180,9 @@ function ProjectContent({
                 className="inline-flex items-center gap-1.5 text-primary-text hover:underline"
               >
                 {t.projectDetail.github}
+                <span className="sr-only">
+                  , {t.projectDetail.openInNewTab}
+                </span>
                 <span aria-hidden="true">↗</span>
               </a>
             ) : null}
@@ -191,6 +194,9 @@ function ProjectContent({
                 className="inline-flex items-center gap-1.5 text-primary-text hover:underline"
               >
                 {storeLabel}
+                <span className="sr-only">
+                  , {t.projectDetail.openInNewTab}
+                </span>
                 <span aria-hidden="true">↗</span>
               </a>
             ) : null}
@@ -275,6 +281,15 @@ function ProjectContent({
             );
           })}
         </div>
+
+        {visibleFeatures.length === 0 ? (
+          <p
+            data-testid="lens-empty"
+            className="mt-8 rounded-lg border border-dashed border-line bg-card p-8 text-center text-sm text-muted"
+          >
+            {t.projectDetail.emptyLens}
+          </p>
+        ) : null}
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           {visibleFeatures.map((feature, index) => (

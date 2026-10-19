@@ -14,7 +14,6 @@
     "*.{ts,js}"
   ],
   "ignoreDependencies": [
-    "@axe-core/playwright",
     "@testing-library/jest-dom",
     "@testing-library/react",
     "prettier",
