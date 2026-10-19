@@ -9,6 +9,34 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const nextRoot = path.join(repoRoot, ".next");
 const outputRoot = path.join(nextRoot, "first-load");
 const budgetBytes = 180_000;
+const projectsDirectory = path.join(repoRoot, "content", "projects");
+
+function representativeProjectSlug() {
+  if (!fs.existsSync(projectsDirectory)) {
+    return null;
+  }
+
+  const files = fs
+    .readdirSync(projectsDirectory)
+    .filter((fileName) => fileName.endsWith(".json"))
+    .sort();
+
+  for (const fileName of files) {
+    try {
+      const project = JSON.parse(
+        fs.readFileSync(path.join(projectsDirectory, fileName), "utf8"),
+      );
+
+      if (typeof project.slug === "string" && project.slug.length > 0) {
+        return project.slug;
+      }
+    } catch {
+      // Content validation reports malformed files; skip them while measuring.
+    }
+  }
+
+  return null;
+}
 
 const routes = [
   {
@@ -16,12 +44,23 @@ const routes = [
     html: path.join(nextRoot, "server", "app", "index.html"),
     output: "home",
   },
-  {
-    name: "/projects/[slug]",
-    html: path.join(nextRoot, "server", "app", "projects", "demo-project-one.html"),
-    output: "project",
-  },
 ];
+
+const projectSlug = representativeProjectSlug();
+
+if (projectSlug) {
+  routes.push({
+    name: "/projects/[slug]",
+    html: path.join(
+      nextRoot,
+      "server",
+      "app",
+      "projects",
+      `${projectSlug}.html`,
+    ),
+    output: "project",
+  });
+}
 
 function scriptSources(html) {
   const sources = [];

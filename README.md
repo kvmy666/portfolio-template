@@ -1,24 +1,56 @@
 # Portfolio Template
 
-An open-source, config-driven portfolio template for developers. It ships a
-single-page Next.js 16 App Router site with React 19, TypeScript, Tailwind CSS
-v4, localized content, validated JSON authoring, and a setup wizard. The
-included persona and projects are a fictional demo; replace them with your own
-content and assets.
+An open-source, config-driven portfolio for developers. One Next.js 16 App
+Router site, React 19, TypeScript, Tailwind CSS v4, validated JSON content,
+client-side locales, a desktop dock and mobile bar, and a setup wizard that
+turns the demo into your portfolio.
+
+The included persona, projects, screenshots, and assets are fictional demo
+content. Replace them with your own work.
+
+## Screenshots
+
+| Home (English, dark) | Home (Arabic, RTL) |
+| --- | --- |
+| ![Home page in English with the vertical dock](docs/screenshots/home-dark-en.png) | ![Home page in Arabic with a right-to-left layout](docs/screenshots/home-dark-ar.png) |
+
+| Project detail | Mobile home |
+| --- | --- |
+| ![Demo project detail page with lenses and metrics](docs/screenshots/project-detail.png) | ![Mobile home page with the bottom navigation bar](docs/screenshots/mobile-home.png) |
+
+## 🤖 Copy this message for your agent
+
+```
+Set up this portfolio template for me. First ask me:
+1) How many projects do I have (0–50)?
+2) Do I want English only, or English + another language (Arabic or any other)?
+3) My name, role, links (GitHub/LinkedIn/website), and contact email.
+4) Do I want a CV, contact form, live metrics, 3D hero, and laptop animation?
+
+Then run `npm run setup`, fill in my content under `content/`, replace the demo assets, and run `npm run build` and `npm test` to verify. Do not invent personal data.
+```
+
+For a richer agent brief, see [`AGENTS.md`](AGENTS.md).
 
 ## Features
 
-- Single-page layout with a vertical desktop dock and a mobile bottom bar
-- Floating theme and locale controls with no page reload
-- Projects from 0 to N, read from `content/projects/*.json`
-- English-only or any locale, with right-to-left support
-- 3D hero card and a scroll-driven laptop scrub visual
-- CV preview modal with download, plus a validated contact form and API
-- Optional CV, contact, metrics, 3D splash, and laptop feature flags
-- Zod-validated site config, projects, and locale dictionaries
-- Interactive setup wizard with non-interactive flags
-- Generated demo SVG assets released under CC0
-- Privacy scan, unit tests, Playwright smoke tests, Lighthouse config, and CI
+- Single-page site with a vertical desktop dock and a mobile bottom bar
+- Live theme and locale switching without a page reload, including RTL layouts
+- Projects from 0 to N, loaded from `content/projects/*.json`
+- Project detail pages with overview, tech stack, feature lenses, and deep-dive
+- Animated hero card and a scroll-driven laptop visual, both with reduced-motion
+  fallbacks
+- Optional CV preview modal, contact form, and live metrics
+- Zod-validated site config, projects, and locale dictionaries with actionable
+  build errors
+- SEO: canonical URLs, Open Graph/Twitter metadata, JSON-LD, sitemap, robots,
+  and a generated 1200×630 social image
+- Accessibility coverage with Playwright + axe, keyboard-friendly controls, and
+  skip navigation
+- Performance gates: per-route first-load JavaScript budgets, CSS budget,
+  Lighthouse budgets, and a dedicated FPS harness
+- Interactive setup wizard with non-interactive flags, privacy scanning, and CI
+  template-smoke jobs
 
 ## Quick start
 
@@ -50,31 +82,40 @@ content and assets.
 
 Open [http://localhost:3000](http://localhost:3000).
 
-For a non-interactive setup, run:
+Non-interactive setup is also supported:
 
 ```bash
 npm run setup -- --yes --projects=3 --langs=en,ar
 ```
 
-See `docs/SETUP.md` for every flag and for the verification commands.
+See [`docs/SETUP.md`](docs/SETUP.md) for every flag, and
+[`docs/CONTENT.md`](docs/CONTENT.md) for the content model.
 
-## 🤖 Copy this message for your agent
+## Commands
 
-```
-Set up this portfolio template for me. First ask me:
-1) How many projects do I have (0–50)?
-2) Do I want English only, or English + another language (Arabic or any other)?
-3) My name, role, links (GitHub/LinkedIn/website), and contact email.
-4) Do I want a CV, contact form, live metrics, 3D hero, and laptop animation?
-
-Then run `npm run setup`, fill in my content under `content/`, replace the demo assets, and run `npm run build` and `npm test` to verify. Do not invent personal data.
-```
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build plus first-load budget check |
+| `npm start` | Serve the production build |
+| `npm run setup` | Configure identity, projects, locales, and features |
+| `npm run typecheck` | TypeScript, no emit |
+| `npm run lint` | ESLint |
+| `npm test` | Vitest unit tests |
+| `npm run test:e2e` | Playwright end-to-end tests |
+| `npm run test:a11y` | Playwright + axe accessibility tests |
+| `npm run test:visual` | Visual Playwright tests |
+| `npm run test:fps` | FPS harness (tagged `@fps`) |
+| `npm run size` | Check the configured first-load and CSS budgets |
+| `npm run lighthouse` | Lighthouse CI against home and project detail |
+| `npm run knip` | Detect unused files and exports |
+| `npm run verify:fast` | Typecheck, lint, unit tests, knip, privacy scan |
 
 ## Configuration reference
 
 `content/site.json` is the source of truth for the site. It is validated by
 `SiteConfigSchema` in `src/content/schema.ts`, parsed by `site.config.ts`, and
-the build fails with a clear path-specific error if a value is invalid.
+the build fails with a path-specific error if a value is invalid.
 
 | Field | Type | Notes |
 | --- | --- | --- |
@@ -86,7 +127,7 @@ the build fails with a clear path-specific error if a value is invalid.
 | `links` | object | `github`, `linkedin`, and `website` are URL or null |
 | `defaultLocale` | locale code | Must appear in `locales` |
 | `locales` | array | Each locale has `code`, `label`, `dir`, `htmlLang` |
-| `features` | object | Boolean feature flags |
+| `features` | object | Five boolean feature flags |
 | `cv.file` | site path or null | PDF previewed and downloaded in the CV section |
 | `hero.photo` | site path or null | Hero portrait; null uses the demo avatar |
 | `hero.laptopFrames` | site path array or null | Scroll-scrub frame sequence; null uses the CSS demo laptop |
@@ -110,125 +151,12 @@ Set any flag to `false` to remove that part of the page:
 | `splash3d` | 3D hero card |
 | `laptop` | Scroll-driven laptop visual |
 
-### Live metrics
-
-With `metrics` enabled, project cards and detail headers show downloads and
-GitHub stars. Downloads combine `assets[].download_count` from releases in both
-`sources.github` and `sources.mirror`; stars come from the GitHub repository.
-The static `metrics` values render immediately, then live values replace them
-after mount. Successful responses are cached in `sessionStorage` under a
-`metrics:<slug>` key that includes both source slugs for one hour. Failed or
-malformed requests are silent and leave the fallback in place. Google Play
-install counts and review status are intentionally not shown.
-
-### Laptop visual and frames
-
-The laptop visual lives in the About section. By default `hero.laptopFrames` is
-`null`, so the template renders a CSS 3D demo laptop whose lid opens with the
-scroll progress. Replace it with a frame sequence to use rendered artwork:
-
-```json
-{
-  "hero": {
-    "photo": null,
-    "laptopFrames": [
-      "/frames/frame-001.webp",
-      "/frames/frame-002.webp",
-      "/frames/frame-003.webp"
-    ]
-  }
-}
-```
-
-Paths are public URLs and must start with `/`. Put the files in
-`public/frames/` (or any public folder) and keep the order correct. Recommended:
-60–90 frames, WebP, and no more than 2.5 MB total. The component preloads every
-frame, draws the current frame into a fixed-aspect canvas with
-`object-fit: contain` behavior, and therefore does not shift layout. The list
-may also be `null` (or empty) to keep the CSS fallback.
-
-On screens wider than 750px, the section is pinned with GSAP ScrollTrigger and
-the visual eases toward the scroll target with exponential smoothing. On mobile
-the visual is not pinned: it plays once for about 1.8 seconds when it enters the
-viewport. With `prefers-reduced-motion: reduce`, the laptop is shown in its
-static open state with no pin or loop.
-
-### CV
-
-Set `cv.file` to a PDF under `public/`; the path must start with `/`:
-
-```json
-{
-  "cv": { "file": "/cv/your-name.pdf" }
-}
-```
-
-The demo ships a generic `public/demo/cv.pdf`. The section renders when
-`features.cv` is on and `cv.file` is not `null`. **View CV** opens a native
-`<dialog>` with an iframe preview, an inner download, and an open-in-new-tab
-fallback. **Download** uses the file `download` attribute. The same PDF is used
-for every locale; only the surrounding UI labels are translated. Set
-`cv.file` to `null` to hide the CV while keeping the feature flag on.
-
-### Contact form
-
-With `features.contact` on, the contact section renders a client form (Name,
-Email, Label, Message) that posts JSON to `/api/contact`. Label options come from
-`contact.labels[locale]`; the demo uses `Coop training` / `تدريب تعاوني`.
-
-The endpoint validates with a shared Zod schema, checks the origin against
-`url`, ignores submissions with the hidden `company` honeypot, and allows 5
-requests per 10 minutes per IP. With `RESEND_API_KEY` set it sends through
-Resend using `CONTACT_FROM` / `CONTACT_TO` (recipient defaults to
-`contact.recipient`). Without a key, development returns a dev `202`; production
-returns `503`.
-
-For tests, `CONTACT_DEV_MODE=1` allows that dev `202` from a production server
-process. Do not set it in production. See `docs/DEPLOY.md` for the full status
-matrix and the Cloudflare KV note. Message bodies and email addresses are never
-logged, and no form data is placed in URLs.
-
-```bash
-RESEND_API_KEY=re_...
-CONTACT_FROM="Portfolio <you@example.com>"
-CONTACT_TO=you@example.com
-```
-
-### Locales
-
-The demo ships English and Arabic. Locale metadata drives `lang` and `dir` on
-the document. The floating theme and locale controls apply changes without a
-full page reload and remember the choice in local storage. Add a locale to
-`content/site.json`, create a matching
-`content/locales/<code>.json`, and set `dir` to `rtl` when needed. The setup
-wizard creates new dictionary files by copying English and adding a `_todo`
-marker.
-
-## SEO and metadata
-
-`siteConfig.url` (from `content/site.json`) is the canonical public origin. Set
-it to the production domain before building; contact origin checks use it too.
-
-- `/sitemap.xml` is generated at build time from the home page and every
-  `content/projects/*.json` entry. Home has priority `1`; project pages use
-  `0.7`. `lastModified` is the build date.
-- `/robots.txt` allows all crawlers and points at
-  `<siteConfig.url>/sitemap.xml`.
-- `/opengraph-image` renders a static 1200×630 PNG from the site name, default
-  role, and pitch. It uses a system sans-serif and makes no network requests.
-- The root layout emits `canonical`, Open Graph, Twitter card, and a
-  schema.org `Person` JSON-LD script (`name`, `jobTitle`, `url`, `email`, and
-  GitHub/LinkedIn `sameAs`). Project pages override `canonical`, title,
-  description, and OG type `article`.
-- Every route has a unique title and description. Titles combine the page name
-  with the site name.
-
-Change `url`, `name`, `role`, or `pitch` in `content/site.json` and rebuild to
-regenerate all of the above. See `docs/CUSTOMIZE.md` for details.
+The page remains usable with every flag disabled.
 
 ## Content authoring
 
-Each file in `content/projects/` must validate against `ProjectSchema`:
+Each file in `content/projects/` must validate against `ProjectSchema`. A
+minimal project looks like this:
 
 ```json
 {
@@ -269,59 +197,169 @@ Each file in `content/projects/` must validate against `ProjectSchema`:
 
 Rules and conventions:
 
-- Slugs are unique, lowercase, and hyphenated.
-- Projects sort by `order`, then by slug.
+- Slugs are unique, lowercase, and hyphenated. Projects sort by `order`, then
+  by slug.
 - Every localized string needs the default locale key.
 - `platform` is `web`, `android`, `ios`, or `cross-platform`.
 - Each feature needs `title`, `oneLiner`, `description`, and one or more unique
   tags from `UX`, `Security`, `Testing`, and `Performance`.
-- `features[].media` is `null` or `{ "src": "/path", "alt": localized, "type": "image" | "video" }`.
-  Keep videos muted, looping, `playsInline`, six seconds or shorter, and at most
-  2.5 MB. Keep images at or below 1.5 MB. Prefer WebM over GIF.
+- `features[].media` is `null` or `{ "src", "alt", "type" }`, where `type` is
+  `image` or `video`. Keep videos muted, looping, `playsInline`, six seconds or
+  shorter, and at most 2.5 MB. Keep images at or below 1.5 MB. Prefer WebM over
+  GIF.
 - `features[].evidence` is `null` or a localized note about what was checked and
   how.
 - `metrics` is `null` or a static fallback
-  `{ "github": number | null, "mirror": number | null }`, where `github` is the
-  fallback stars and `mirror` is the fallback downloads.
-- `sources` holds optional full `owner/repo` slugs:
-  `{ "github": "owner/repo" | null, "mirror": "owner/repo" | null }`. Stars come
-  from `github`; downloads sum releases from both sources.
-- `deepDive` holds optional architecture copy and a short code sample:
-  `{ "architecture": localized | null, "code": { "language", "snippet" } | null }`.
+  `{ "github": number | null, "mirror": number | null }`.
+- `sources` holds optional full `owner/repo` slugs. Stars come from `github`;
+  downloads sum releases from both sources.
+- `deepDive` holds optional architecture copy and a short code sample.
 - Set `demo: false` for real work. The wizard never overwrites real projects
   unless you pass `--force`.
 - An empty projects folder is valid and renders the localized empty state.
 
-Each project renders at `/projects/<slug>` in a fixed block order: header,
-overview, tech stack, features (with lens filters), and deep-dive. Lens filters
-include `All`, `UX`, `Security`, `Testing`, and `Performance`; a deep link such
-as `/projects/<slug>#security` selects a lens without navigating. Project
-content intentionally has no CTA, retrospective, or review/publication status
-blocks.
+Project detail pages render in a fixed block order: header, overview, tech
+stack, features (with lens filters), and deep-dive. Lenses include `All`, `UX`,
+`Security`, `Testing`, and `Performance`; a deep link such as
+`/projects/<slug>#security` selects a lens without navigating.
 
 The UI dictionary in `content/locales/*.json` holds navigation, hero, empty
-state, contact, and footer strings. See `docs/CONTENT.md` for the complete
-reference and `docs/CUSTOMIZE.md` for theming and feature changes.
+state, contact, and footer strings. See [`docs/CONTENT.md`](docs/CONTENT.md) for
+the complete reference and [`docs/CUSTOMIZE.md`](docs/CUSTOMIZE.md) for theming.
 
-## Deployment
+## Metrics sources
+
+With `metrics` enabled, project cards and detail headers show downloads and
+GitHub stars. Downloads combine `assets[].download_count` from releases in both
+`sources.github` and `sources.mirror`; stars come from the GitHub repository.
+
+The static `metrics` values render immediately, then live values replace them
+after mount. Successful responses are cached in `sessionStorage` under a
+`metrics:<slug>` key that includes both source slugs for one hour. Failed or
+malformed requests are silent and leave the fallback in place. Google Play
+install counts and review status are intentionally not shown. See
+[`docs/FAQ.md`](docs/FAQ.md) if numbers do not update.
+
+## Contact form and environment
+
+With `features.contact` on, the contact section renders a client form (Name,
+Email, Label, Message) that posts JSON to `/api/contact`. Label options come
+from `contact.labels[locale]`.
+
+The endpoint validates with a shared Zod schema, checks the origin against the
+configured `url`, ignores submissions with the hidden `company` honeypot, and
+allows 5 requests per 10 minutes per IP. With `RESEND_API_KEY` set it sends
+through Resend using `CONTACT_FROM` / `CONTACT_TO` (recipient defaults to
+`contact.recipient`). Without a key, development returns a dev `202`; production
+returns `503`.
+
+```bash
+RESEND_API_KEY=re_...
+CONTACT_FROM="Portfolio <you@example.com>"
+CONTACT_TO=you@example.com
+```
+
+Copy `.env.example` to `.env.local` for local work. Never commit real values.
+`CONTACT_DEV_MODE=1` allows the dev `202` from a production server process for
+tests; do not set it in production. See [`docs/DEPLOY.md`](docs/DEPLOY.md) for
+the full status matrix and rate-limit notes.
+
+## Locales
+
+The demo ships English and Arabic. Locale metadata drives `lang` and `dir` on
+the document. The floating theme and locale controls apply changes without a
+full page reload and remember the choice in local storage.
+
+To add a locale:
+
+1. Add its `code`, `label`, `dir`, and `htmlLang` to `locales` in
+   `content/site.json` (and the matching key to localized site values).
+2. Copy `content/locales/en.json` to `content/locales/<code>.json` and translate
+   the UI strings.
+3. Keep product names, framework names, and other technical names untranslated.
+
+The setup wizard can add one additional locale by copying English and marking
+the file with `_todo`.
+
+## SEO and metadata
+
+`siteConfig.url` (from `content/site.json`) is the canonical public origin. Set
+it to the production domain before building; contact origin checks use it too.
+
+- `/sitemap.xml` is generated at build time from the home page and every
+  `content/projects/*.json` entry. Home has priority `1`; project pages use
+  `0.7`. `lastModified` is the build date.
+- `/robots.txt` allows all crawlers and points at
+  `<siteConfig.url>/sitemap.xml`.
+- `/opengraph-image` renders a static 1200×630 PNG from the site name, default
+  role, and pitch. It makes no network requests.
+- The root layout emits `canonical`, Open Graph, Twitter card, and a schema.org
+  `Person` JSON-LD script. Project pages override canonical, title,
+  description, and OG type `article`.
+- Every route has a unique title and description.
+
+Change `url`, `name`, `role`, or `pitch` in `content/site.json` and rebuild to
+regenerate all of the above.
+
+## Performance and quality gates
+
+`npm run build` compiles with Next.js and then runs
+`scripts/first-load-budget.mjs`. The route budgets are:
+
+| Route | First-load JS (gzip) |
+| --- | --- |
+| `/` | 180 kB |
+| `/projects/[slug]` | 180 kB |
+| All CSS | 30 kB |
+
+`npm run size` checks the same assets through size-limit, and
+`npm run lighthouse` runs Lighthouse CI three times against the home page and a
+project detail page. Lighthouse fails below 0.9 for performance,
+accessibility, best practices, or SEO, or when the configured LCP, CLS, TBT,
+FCP, or script budgets regress. The FPS harness is available through
+`npm run test:fps`.
+
+The `test:a11y` suite scans the main routes with axe and fails on serious or
+critical violations. Keep reduced-motion behavior intact when changing the hero
+and laptop animations.
+
+## Deploy
 
 The contact form needs a request-time server for `/api/contact`, so the default
-build runs as a Next.js server. The proposed Cloudflare target is **OpenNext on
-Cloudflare Workers** (see `docs/adr/ADR-001-deploy.md`). A pure static export
-would need a separate Pages Function for contact delivery or the contact feature
-turned off.
+build runs as a Next.js server. The documented Cloudflare target is OpenNext on
+Cloudflare Workers (see [`docs/adr/ADR-001-deploy.md`](docs/adr/ADR-001-deploy.md)).
+A pure static export would need a separate contact endpoint or the contact
+feature turned off.
 
 Set `RESEND_API_KEY`, `CONTACT_FROM`, and `CONTACT_TO` as host secrets, and wire
-Cloudflare KV for the production rate limit (in-memory limits are per instance).
-Read `docs/DEPLOY.md` for the full matrix and static-export notes.
+a shared rate-limit store for production (the in-memory limiter is per
+instance). Read [`docs/DEPLOY.md`](docs/DEPLOY.md) for the full matrix.
+
+## Documentation
+
+- [`docs/SETUP.md`](docs/SETUP.md) — wizard flags and first-run setup
+- [`docs/CONTENT.md`](docs/CONTENT.md) — site, project, locale, and asset schema
+- [`docs/CUSTOMIZE.md`](docs/CUSTOMIZE.md) — colors, sections, and metadata
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — engine/content split and data flow
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — hosting, env vars, and contact statuses
+- [`docs/FAQ.md`](docs/FAQ.md) — common tasks and troubleshooting
+- [`AGENTS.md`](AGENTS.md) — onboarding for AI coding agents
+
+## Contributing
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+Security reports go through GitHub Security Advisories as described in
+[`SECURITY.md`](SECURITY.md). Community participation is covered by
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 
 ## License
 
-Code is licensed under the MIT License. See `LICENSE`.
+Code is licensed under the MIT License. See [`LICENSE`](LICENSE).
 
 Demo assets are original generated SVG artwork and a generic demo CV PDF,
 dedicated to the public domain under CC0. Fonts are self-hosted under the SIL
-Open Font License. No third-party logos, screenshots, or media are bundled. See
-`NOTICE` for asset details.
+Open Font License. GSAP is distributed under its own standard license, not MIT.
+No third-party logos, screenshots, or media are bundled. See [`NOTICE`](NOTICE)
+for details.
 
 Copyright (c) 2026 Abdulkarim.

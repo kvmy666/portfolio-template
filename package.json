@@ -1,7 +1,16 @@
 {
   "name": "portfolio-template",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kvmy666/portfolio-template"
+  },
+  "homepage": "https://github.com/kvmy666/portfolio-template#readme",
+  "bugs": {
+    "url": "https://github.com/kvmy666/portfolio-template/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build && node scripts/first-load-budget.mjs",
@@ -11,7 +20,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "size": "size-limit",
+    "size": "size-limit --ignore-missing",
     "knip": "knip",
     "verify": "npm run typecheck && npm run lint && npm test && npm run build && node scripts/check-privacy.mjs",
     "verify:fast": "npm run typecheck && npm run lint && npm test && npm run knip && node scripts/check-privacy.mjs",

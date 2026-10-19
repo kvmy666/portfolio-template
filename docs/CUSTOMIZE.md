@@ -3,9 +3,10 @@
 ## Theme
 
 The color tokens and font stacks live in `src/app/globals.css` under `:root`,
-the dark-mode media query, and `@theme inline`. Change those variables to
-change the palette across the page. No font files are bundled; the template
-uses a system font stack.
+`[data-theme="light"]`, and `@theme inline`. Change those variables to change
+the palette across the page. The template self-hosts Inter, Space Grotesk, and
+IBM Plex Sans Arabic in `src/fonts/`; the font variables are set in
+`src/app/layout.tsx`.
 
 ## Feature flags
 
@@ -29,10 +30,10 @@ posts to `/api/contact`. The page remains usable with every flag disabled.
 
 ## Navigation and copy
 
-Navigation labels and shared UI copy live in `content/locales/`. Update both
-`en.json` and any additional locale files. Page-specific headings such as
-"Selected work" are intentionally generic and can be edited in
-`src/app/page.tsx`.
+Navigation labels, section headings, and shared UI copy live in
+`content/locales/`. Update `en.json` and any additional locale files, keeping
+the same object shape. Site-specific copy (name, role, pitch, about intro) lives
+in `content/site.json`; project copy lives in `content/projects/`.
 
 ## Site URL and social metadata
 
@@ -71,9 +72,10 @@ npm run setup -- --yes --projects=0 --langs=en
 ## Locales and right-to-left layouts
 
 Add a locale to `content/site.json`, create the matching dictionary in
-`content/locales/`, and set `dir` to `rtl` for right-to-left languages. The
-layout reads `htmlLang` and `dir` from the default locale in
-`src/app/layout.tsx`. Locale-specific routing is not part of Phase 0.
+`content/locales/`, and set `dir` to `rtl` for right-to-left languages. The root
+layout renders the default locale's `htmlLang` and `dir`; `LocaleProvider`
+updates both attributes when the visitor switches language, without a
+navigation. There is one URL per page and no locale route prefix.
 
 ## Demo assets
 

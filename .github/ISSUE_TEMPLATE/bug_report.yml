@@ -1,0 +1,92 @@
+name: Bug report
+description: Report a reproducible problem with the template
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not include personal data, secrets, or
+        security vulnerabilities in this public form. Report vulnerabilities
+        privately through the Security tab.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong, in one or two sentences?
+      placeholder: The project lens resets after a locale change.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the exact routes, flags, and commands.
+      placeholder: |
+        1. npm ci
+        2. npm run setup -- --yes --projects=3 --langs=en,ar
+        3. npm run dev
+        4. Open /projects/demo-project-one#security
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include console output, screenshots, or traces if useful.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Template version or commit
+      placeholder: v1.0.0 or 95a382a
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node.js, npm, browser, and Playwright project if relevant.
+      placeholder: Ubuntu 24.04, Node 22.22, Chromium
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Setup wizard or content schema
+        - Rendering or interactions
+        - Locales or RTL
+        - CV or contact form
+        - Metrics
+        - SEO or metadata
+        - Accessibility
+        - Performance or budgets
+        - Documentation
+        - CI or deployment
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant configuration
+      description: Paste a redacted snippet of content/site.json or project JSON.
+      render: json
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: I removed personal data and secrets from this report.
+          required: true
