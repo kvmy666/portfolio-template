@@ -20,6 +20,9 @@
     "splash3d": true,
     "laptop": true
   },
+  "hero": {
+    "photo": null
+  },
   "contact": {
     "recipient": "you@example.com",
     "labels": { "en": ["Coop training"], "ar": ["تدريب تعاوني"] }

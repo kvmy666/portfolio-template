@@ -30,6 +30,9 @@ type SiteFixture = {
     recipient: string;
     labels: Record<string, string[]>;
   };
+  hero: {
+    photo: string | null;
+  };
 };
 
 function validSite(): SiteFixture {
@@ -136,6 +139,34 @@ describe("SiteConfigSchema", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("accepts a null or absolute hero photo path", () => {
+    const noPhoto = validSite();
+    noPhoto.hero.photo = null;
+    expect(SiteConfigSchema.safeParse(noPhoto).success).toBe(true);
+
+    const withPhoto = validSite();
+    withPhoto.hero.photo = "/demo/avatar.svg";
+    expect(SiteConfigSchema.safeParse(withPhoto).success).toBe(true);
+  });
+
+  it("rejects a relative hero photo path", () => {
+    const fixture = validSite();
+    fixture.hero.photo = "demo/avatar.svg";
+
+    const result = SiteConfigSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["hero", "photo"],
+          }),
+        ]),
+      );
+    }
   });
 });
 

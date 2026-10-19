@@ -41,6 +41,14 @@ const ContactSchema = z.strictObject({
   labels: z.record(localeCodeSchema, z.array(z.string().trim().min(1)).min(1)),
 });
 
+const HeroSchema = z.strictObject({
+  photo: z
+    .string()
+    .trim()
+    .regex(/^\//, "Hero photo paths must start with /")
+    .nullable(),
+});
+
 type IssueContext = {
   addIssue: (issue: {
     code: "custom";
@@ -92,6 +100,7 @@ export const SiteConfigSchema = z
     locales: z.array(LocaleConfigSchema).min(1),
     features: FeatureFlagsSchema,
     contact: ContactSchema,
+    hero: HeroSchema,
   })
   .superRefine((config, ctx) => {
     const codes = config.locales.map((locale) => locale.code);
@@ -246,6 +255,7 @@ export const LocaleStringsSchema = z.strictObject({
     aboutMe: z.string().min(1),
     portfolio: z.string().min(1),
     demo: z.string().min(1),
+    demoPhoto: z.string().min(1),
   }),
   projects: z.strictObject({
     empty: z.string().min(1),

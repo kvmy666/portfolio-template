@@ -58,6 +58,7 @@ const DEFAULT_EN_STRINGS = {
     aboutMe: "About me",
     portfolio: "Portfolio",
     demo: "Demo",
+    demoPhoto: "Demo photo",
   },
   projects: {
     empty: "Projects are coming soon.",
@@ -119,7 +120,7 @@ const DEFAULT_EN_STRINGS = {
   },
 };
 
-const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--force]
+const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--photo=/path] [--force]
 
 Options:
   --yes              Use safe defaults and skip prompts
@@ -127,6 +128,7 @@ Options:
   --langs=en[,code]  English only, or English plus one locale
   --name=NAME        Override the display name
   --email=EMAIL      Override the contact email
+  --photo=/path      Absolute site path for the hero photo (blank clears it)
   --force            Allow replacing a demo path that holds a real project
   --help             Show this help`;
 
@@ -176,6 +178,23 @@ function requireEmail(value) {
     fail(`"${email}" is not a valid email address`);
   }
   return email;
+}
+
+function optionalSitePhoto(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const text = String(value).trim();
+  if (!text) {
+    return null;
+  }
+
+  if (!text.startsWith("/")) {
+    fail('--photo must be an absolute site path that starts with "/"');
+  }
+
+  return text;
 }
 
 function optionalUrl(value, label) {
@@ -252,6 +271,7 @@ function parseArgs(argv) {
     langs: null,
     name: null,
     email: null,
+    photo: undefined,
   };
 
   for (const argument of argv) {
@@ -269,6 +289,8 @@ function parseArgs(argv) {
       options.name = requireText(argument.slice("--name=".length), "Name");
     } else if (argument.startsWith("--email=")) {
       options.email = requireEmail(argument.slice("--email=".length));
+    } else if (argument.startsWith("--photo=")) {
+      options.photo = optionalSitePhoto(argument.slice("--photo=".length));
     } else {
       fail(`Unknown argument: ${argument}`);
     }
@@ -567,6 +589,16 @@ function validateSite(site) {
     }
   }
 
+  if (!isPlainObject(site.hero)) {
+    fail("hero must be an object with a photo value");
+  }
+  if (
+    site.hero.photo !== null &&
+    (typeof site.hero.photo !== "string" || !site.hero.photo.startsWith("/"))
+  ) {
+    fail('hero.photo must be null or an absolute site path starting with "/"');
+  }
+
   for (const key of ["github", "linkedin", "website"]) {
     const value = site.links?.[key];
     if (value !== null && typeof value !== "string") {
@@ -824,6 +856,10 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
       projectCount: options.projects ?? projectCount,
       github,
       linkedin,
+      photo:
+        options.photo !== undefined
+          ? options.photo
+          : (existingSite.hero?.photo ?? null),
       features: {
         cv: existingBoolean(existingSite.features, "cv"),
         contact: existingBoolean(existingSite.features, "contact"),
@@ -846,6 +882,10 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
   answers.email = options.email ?? requireEmail(await ask(rl, "Email", email));
   answers.github = await askOptionalUrl(rl, "GitHub URL", github);
   answers.linkedin = await askOptionalUrl(rl, "LinkedIn URL", linkedin);
+  answers.photo =
+    options.photo !== undefined
+      ? options.photo
+      : (existingSite.hero?.photo ?? null);
   answers.features = {
     cv: await askBoolean(
       rl,
@@ -917,6 +957,9 @@ function buildSite(existingSite, answers) {
     contact: {
       recipient: requireEmail(answers.email),
       labels,
+    },
+    hero: {
+      photo: answers.photo ?? null,
     },
   };
 

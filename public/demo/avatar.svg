@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 640" fill="none">
+  <defs>
+    <linearGradient id="shoulders" x1="240" y1="458" x2="240" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0d6b33" />
+      <stop offset="0.55" stop-color="#0a5c2a" />
+      <stop offset="1" stop-color="#03140a" />
+    </linearGradient>
+    <linearGradient id="head" x1="164" y1="160" x2="332" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1f8a46" />
+      <stop offset="0.6" stop-color="#0f6b34" />
+      <stop offset="1" stop-color="#0a5c2a" />
+    </linearGradient>
+    <linearGradient id="rim" x1="340" y1="196" x2="388" y2="566" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7dffb0" stop-opacity="0.85" />
+      <stop offset="0.55" stop-color="#00b13f" stop-opacity="0.45" />
+      <stop offset="1" stop-color="#00b13f" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="rim-soft" x1="136" y1="210" x2="118" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7dffb0" stop-opacity="0.32" />
+      <stop offset="1" stop-color="#00b13f" stop-opacity="0" />
+    </linearGradient>
+    <radialGradient id="base-glow" cx="0" cy="0" r="1" gradientTransform="translate(240 606) rotate(90) scale(34 208)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00b13f" stop-opacity="0.34" />
+      <stop offset="1" stop-color="#00b13f" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="240" cy="606" rx="208" ry="34" fill="url(#base-glow)" />
+
+  <path d="M40 640C54 516 140 466 240 466C340 466 426 516 440 640H40Z" fill="url(#shoulders)" />
+  <path d="M40 640C54 516 140 466 240 466V640H40Z" fill="#0a5c2a" fill-opacity="0.55" />
+  <path d="M240 466C300 478 332 522 344 590L314 640H240V466Z" fill="#03140a" fill-opacity="0.35" />
+  <path d="M96 602C118 536 164 496 218 478L236 640H86L96 602Z" fill="#137239" fill-opacity="0.45" />
+  <path d="M386 606C362 534 320 496 264 478L248 640H396L386 606Z" fill="#0a5c2a" fill-opacity="0.4" />
+
+  <path d="M204 404H276V492C276 514 204 514 204 492V404Z" fill="#0a5c2a" />
+  <path d="M204 404H240V506C220 506 204 500 204 492V404Z" fill="#0f6b34" />
+
+  <path d="M240 146C306 146 350 200 350 270C350 334 322 380 282 402C268 410 212 410 198 402C158 380 130 334 130 270C130 200 174 146 240 146Z" fill="url(#head)" />
+
+  <path d="M240 146C204 146 174 164 156 192L206 224L240 202V146Z" fill="#23a052" fill-opacity="0.55" />
+  <path d="M350 270C338 246 320 226 296 214L278 262L314 306L350 270Z" fill="#137239" fill-opacity="0.6" />
+  <path d="M130 270C130 308 142 342 164 366L194 330L170 280L130 270Z" fill="#0a5c2a" fill-opacity="0.65" />
+  <path d="M282 402C314 382 340 342 346 300L310 286L276 336L282 402Z" fill="#074a23" fill-opacity="0.55" />
+  <path d="M198 402C176 390 160 370 150 346L184 332L214 372L198 402Z" fill="#0f6b34" fill-opacity="0.6" />
+  <path d="M206 224L240 202L240 146C222 146 204 154 190 168L206 224Z" fill="#2fbf65" fill-opacity="0.28" />
+  <path d="M240 202L278 262L240 286L206 224L240 202Z" fill="#7dffb0" fill-opacity="0.12" />
+  <path d="M240 286L278 262L310 286L276 336L240 320V286Z" fill="#00b13f" fill-opacity="0.16" />
+  <path d="M170 280L206 224L240 286L194 330L170 280Z" fill="#0a5c2a" fill-opacity="0.45" />
+  <path d="M214 372L240 320L276 336L282 402L268 408L212 408L198 402L214 372Z" fill="#0d6b33" fill-opacity="0.5" />
+
+  <path d="M312 186C338 214 350 250 346 302C342 358 320 390 290 406" stroke="url(#rim)" stroke-width="7" stroke-linecap="round" />
+  <path d="M162 212C146 240 138 276 142 318C147 366 164 396 190 410" stroke="url(#rim-soft)" stroke-width="5" stroke-linecap="round" />
+  <path d="M350 528C374 566 392 596 400 626" stroke="url(#rim)" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+
+  <circle cx="286" cy="252" r="5" fill="#7dffb0" fill-opacity="0.7" />
+  <circle cx="196" cy="316" r="3.5" fill="#7dffb0" fill-opacity="0.45" />
+</svg>

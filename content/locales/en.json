@@ -9,7 +9,8 @@
   "hero": {
     "aboutMe": "About me",
     "portfolio": "Portfolio",
-    "demo": "Demo"
+    "demo": "Demo",
+    "demoPhoto": "Demo photo"
   },
   "projects": {
     "empty": "Projects are coming soon.",

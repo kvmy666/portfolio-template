@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 
 import type {
@@ -12,6 +13,8 @@ import type {
 import { Dock } from "./Dock";
 import { LocaleProvider, useLocale } from "./LocaleProvider";
 import { Utilities } from "./Utilities";
+
+const HeroSplash = dynamic(() => import("./HeroSplash"), { ssr: false });
 
 const tagStyles: Record<FeatureTag, string> = {
   UX: "border border-accent/30 bg-accent/10 text-primary-text",
@@ -26,17 +29,6 @@ function localized(
   fallback: string,
 ): string {
   return value[locale] ?? value[fallback] ?? Object.values(value)[0] ?? "";
-}
-
-function getInitials(name: string): string {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-
-  return initials || "YN";
 }
 
 type PortfolioShellProps = {
@@ -72,7 +64,8 @@ function PortfolioContent({
     site.contact.labels[locale] ??
     site.contact.labels[site.defaultLocale] ??
     [];
-  const showVisual = features.splash3d || features.laptop;
+  const heroPhoto = site.hero.photo ?? "/demo/avatar.svg";
+  const showDemoPhotoCaption = site.hero.photo === null;
 
   const socialLinks = [
     site.links.github
@@ -132,10 +125,7 @@ function PortfolioContent({
       <Dock features={features} />
 
       <main id="main" className="page-main page-container flex-1">
-        <section
-          id="home"
-          className={showVisual ? "hero-grid" : undefined}
-        >
+        <section id="home" className="hero-grid">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary-text">
               <span
@@ -192,75 +182,22 @@ function PortfolioContent({
             </ul>
           </div>
 
-          {showVisual ? (
-            <div className="space-y-10">
-              {features.splash3d ? (
-                <div
-                  className="hero-scene mx-auto w-full max-w-sm"
-                  aria-hidden="true"
-                >
-                  <div className="hero-card relative overflow-hidden rounded-xl p-7 text-white">
-                    <div className="hero-card-grid absolute inset-0 opacity-40" />
-                    <div className="relative flex items-center justify-between">
-                      <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.22em]">
-                        {t.hero.portfolio}
-                      </span>
-                      <span className="text-xs text-white/70">
-                        {t.hero.demo}
-                      </span>
-                    </div>
-                    <div className="relative mt-16 flex h-24 w-24 items-center justify-center rounded-lg border border-white/30 bg-white/15 text-3xl font-semibold backdrop-blur">
-                      {getInitials(site.name)}
-                    </div>
-                    <div className="relative mt-8 space-y-3">
-                      <div className="h-2.5 w-3/4 rounded-full bg-white/50" />
-                      <div className="h-2.5 w-1/2 rounded-full bg-white/30" />
-                      <div className="h-2.5 w-2/3 rounded-full bg-white/20" />
-                    </div>
-                    <div className="relative mt-8 flex gap-2">
-                      <span className="h-8 w-20 rounded-full bg-white/20" />
-                      <span className="h-8 w-14 rounded-full bg-white/10" />
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-
-              {features.laptop ? (
-                <div
-                  className="laptop-stage mx-auto w-full max-w-md"
-                  aria-hidden="true"
-                >
-                  <div className="laptop-screen overflow-hidden p-4">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-muted" />
-                      <span className="h-2 w-2 rounded-full bg-accent/60" />
-                      <span className="h-2 w-2 rounded-full bg-accent" />
-                    </div>
-                    <div className="mt-4 rounded-md border border-white/10 bg-white/[0.04] p-4">
-                      <div className="h-2 w-24 rounded-full bg-primary-text/70" />
-                      <div className="mt-4 space-y-2.5">
-                        <div className="code-line w-full" />
-                        <div className="code-line w-5/6" />
-                        <div className="code-line w-2/3" />
-                        <div className="code-line w-3/4" />
-                      </div>
-                      <div className="mt-5 grid grid-cols-2 gap-2">
-                        <div className="rounded-sm border border-white/10 bg-white/[0.05] p-3">
-                          <div className="h-1.5 w-10 rounded-full bg-primary-text/70" />
-                          <div className="mt-2 h-1.5 w-14 rounded-full bg-white/20" />
-                        </div>
-                        <div className="rounded-sm border border-white/10 bg-white/[0.05] p-3">
-                          <div className="h-1.5 w-8 rounded-full bg-primary-text/50" />
-                          <div className="mt-2 h-1.5 w-12 rounded-full bg-white/20" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="laptop-base" />
-                </div>
+          <div className="hero-panel" data-hero-panel aria-hidden="true">
+            <div className="hero-panel-inner">
+              <div className="hero-splash-poster" />
+              {features.splash3d ? <HeroSplash /> : null}
+              <div
+                className="hero-photo"
+                style={{
+                  backgroundImage: `url(${JSON.stringify(heroPhoto)})`,
+                }}
+              />
+              <div className="hero-photo-fade" />
+              {showDemoPhotoCaption ? (
+                <span className="hero-demo-caption">{t.hero.demoPhoto}</span>
               ) : null}
             </div>
-          ) : null}
+          </div>
         </section>
 
         <section id="about" className="mt-24">
