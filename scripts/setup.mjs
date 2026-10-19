@@ -33,6 +33,11 @@ const DEFAULT_SITE = {
   website: null,
 };
 
+const DEFAULT_ABOUT_INTRO = {
+  en: "I turn ideas into fast, accessible products that people enjoy using.",
+  ar: "أحوّل الأفكار إلى منتجات سريعة وسهلة الوصول يستمتع الناس باستخدامها.",
+};
+
 const LOCALE_META = {
   en: { label: "English", dir: "ltr" },
   ar: { label: "العربية", dir: "rtl" },
@@ -54,7 +59,12 @@ const DEFAULT_EN_STRINGS = {
     projects: "Projects",
     contact: "Contact",
   },
-  hero: { aboutMe: "About me" },
+  hero: {
+    aboutMe: "About me",
+    portfolio: "Portfolio",
+    demo: "Demo",
+    demoPhoto: "Demo photo",
+  },
   projects: {
     empty: "Projects are coming soon.",
     emptyHint: "Add JSON files under content/projects to fill this grid.",
@@ -115,7 +125,7 @@ const DEFAULT_EN_STRINGS = {
   },
 };
 
-const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--force]
+const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--photo=/path] [--force]
 
 Options:
   --yes              Use safe defaults and skip prompts
@@ -123,6 +133,7 @@ Options:
   --langs=en[,code]  English only, or English plus one locale
   --name=NAME        Override the display name
   --email=EMAIL      Override the contact email
+  --photo=/path      Absolute site path for the hero photo (blank clears it)
   --force            Allow replacing a demo path that holds a real project
   --help             Show this help`;
 
@@ -172,6 +183,42 @@ function requireEmail(value) {
     fail(`"${email}" is not a valid email address`);
   }
   return email;
+}
+
+function optionalSitePhoto(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const text = String(value).trim();
+  if (!text) {
+    return null;
+  }
+
+  if (!text.startsWith("/")) {
+    fail('--photo must be an absolute site path that starts with "/"');
+  }
+
+  return text;
+}
+
+function laptopFrames(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!Array.isArray(value)) {
+    fail("hero.laptopFrames must be null or an array of site paths");
+  }
+
+  const frames = value.map((frame) => {
+    if (typeof frame !== "string" || !frame.trim().startsWith("/")) {
+      fail('Every hero.laptopFrames entry must start with "/"');
+    }
+    return frame.trim();
+  });
+
+  return frames.length > 0 ? frames : null;
 }
 
 function optionalUrl(value, label) {
@@ -248,6 +295,7 @@ function parseArgs(argv) {
     langs: null,
     name: null,
     email: null,
+    photo: undefined,
   };
 
   for (const argument of argv) {
@@ -265,6 +313,8 @@ function parseArgs(argv) {
       options.name = requireText(argument.slice("--name=".length), "Name");
     } else if (argument.startsWith("--email=")) {
       options.email = requireEmail(argument.slice("--email=".length));
+    } else if (argument.startsWith("--photo=")) {
+      options.photo = optionalSitePhoto(argument.slice("--photo=".length));
     } else {
       fail(`Unknown argument: ${argument}`);
     }
@@ -563,6 +613,37 @@ function validateSite(site) {
     }
   }
 
+  if (!isPlainObject(site.hero)) {
+    fail("hero must be an object with a photo value");
+  }
+  if (
+    site.hero.photo !== null &&
+    (typeof site.hero.photo !== "string" || !site.hero.photo.startsWith("/"))
+  ) {
+    fail('hero.photo must be null or an absolute site path starting with "/"');
+  }
+
+  if (site.hero.laptopFrames !== null) {
+    if (
+      !Array.isArray(site.hero.laptopFrames) ||
+      site.hero.laptopFrames.some(
+        (frame) => typeof frame !== "string" || !frame.startsWith("/"),
+      )
+    ) {
+      fail(
+        'hero.laptopFrames must be null or an array of site paths starting with "/"',
+      );
+    }
+  }
+
+  if (
+    !isPlainObject(site.about) ||
+    !isPlainObject(site.about.intro) ||
+    !requireText(site.about.intro.en, "About intro")
+  ) {
+    fail("about.intro needs an English value");
+  }
+
   for (const key of ["github", "linkedin", "website"]) {
     const value = site.links?.[key];
     if (value !== null && typeof value !== "string") {
@@ -820,6 +901,14 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
       projectCount: options.projects ?? projectCount,
       github,
       linkedin,
+      photo:
+        options.photo !== undefined
+          ? options.photo
+          : (existingSite.hero?.photo ?? null),
+      laptopFrames: laptopFrames(existingSite.hero?.laptopFrames),
+      aboutIntro: isPlainObject(existingSite.about?.intro)
+        ? existingSite.about.intro
+        : DEFAULT_ABOUT_INTRO,
       features: {
         cv: existingBoolean(existingSite.features, "cv"),
         contact: existingBoolean(existingSite.features, "contact"),
@@ -842,6 +931,14 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
   answers.email = options.email ?? requireEmail(await ask(rl, "Email", email));
   answers.github = await askOptionalUrl(rl, "GitHub URL", github);
   answers.linkedin = await askOptionalUrl(rl, "LinkedIn URL", linkedin);
+  answers.photo =
+    options.photo !== undefined
+      ? options.photo
+      : (existingSite.hero?.photo ?? null);
+  answers.laptopFrames = laptopFrames(existingSite.hero?.laptopFrames);
+  answers.aboutIntro = isPlainObject(existingSite.about?.intro)
+    ? existingSite.about.intro
+    : DEFAULT_ABOUT_INTRO;
   answers.features = {
     cv: await askBoolean(
       rl,
@@ -886,6 +983,12 @@ function buildSite(existingSite, answers) {
   const labels = filteredLabels(existingSite.contact?.labels, answers.codes);
   labels.en = labels.en ?? ["Coop training"];
 
+  const aboutIntro = filteredLocalized(answers.aboutIntro, answers.codes);
+  aboutIntro.en = existingText(
+    isPlainObject(answers.aboutIntro) ? answers.aboutIntro.en : null,
+    DEFAULT_ABOUT_INTRO.en,
+  );
+
   const site = {
     name: requireText(answers.name, "Name"),
     role,
@@ -913,6 +1016,13 @@ function buildSite(existingSite, answers) {
     contact: {
       recipient: requireEmail(answers.email),
       labels,
+    },
+    hero: {
+      photo: answers.photo ?? null,
+      laptopFrames: laptopFrames(answers.laptopFrames),
+    },
+    about: {
+      intro: aboutIntro,
     },
   };
 

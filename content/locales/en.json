@@ -7,7 +7,10 @@
     "contact": "Contact"
   },
   "hero": {
-    "aboutMe": "About me"
+    "aboutMe": "About me",
+    "portfolio": "Portfolio",
+    "demo": "Demo",
+    "demoPhoto": "Demo photo"
   },
   "projects": {
     "empty": "Projects are coming soon.",

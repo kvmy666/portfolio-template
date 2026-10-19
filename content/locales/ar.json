@@ -7,7 +7,10 @@
     "contact": "تواصل"
   },
   "hero": {
-    "aboutMe": "نبذة عني"
+    "aboutMe": "نبذة عني",
+    "portfolio": "معرض الأعمال",
+    "demo": "تجريبي",
+    "demoPhoto": "صورة تجريبية"
   },
   "projects": {
     "empty": "لا توجد مشاريع بعد.",

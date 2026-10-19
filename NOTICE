@@ -20,3 +20,9 @@ The demo persona and project entries are fictional.
 Attribution
 Attribution is appreciated when you reuse substantial portions of the template,
 but it is not required by the MIT License.
+
+GSAP
+The scroll-scrub laptop animation uses GSAP and ScrollTrigger. GSAP is
+distributed under its standard "no charge" license described at
+https://gsap.com/standard-license and is not licensed under MIT. Review that
+license before redistributing this template or its bundled dependency.

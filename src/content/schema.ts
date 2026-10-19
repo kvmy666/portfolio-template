@@ -41,6 +41,26 @@ const ContactSchema = z.strictObject({
   labels: z.record(localeCodeSchema, z.array(z.string().trim().min(1)).min(1)),
 });
 
+const HeroSchema = z.strictObject({
+  photo: z
+    .string()
+    .trim()
+    .regex(/^\//, "Hero photo paths must start with /")
+    .nullable(),
+  laptopFrames: z
+    .array(
+      z
+        .string()
+        .trim()
+        .regex(/^\//, "Laptop frame paths must start with /"),
+    )
+    .nullable(),
+});
+
+const AboutSchema = z.strictObject({
+  intro: LocalizedStringSchema,
+});
+
 type IssueContext = {
   addIssue: (issue: {
     code: "custom";
@@ -92,6 +112,8 @@ export const SiteConfigSchema = z
     locales: z.array(LocaleConfigSchema).min(1),
     features: FeatureFlagsSchema,
     contact: ContactSchema,
+    hero: HeroSchema,
+    about: AboutSchema,
   })
   .superRefine((config, ctx) => {
     const codes = config.locales.map((locale) => locale.code);
@@ -116,6 +138,12 @@ export const SiteConfigSchema = z
     requireDefaultLocaleKey(config.role, config.defaultLocale, ["role"], ctx);
     requireDefaultLocaleKey(config.pitch, config.defaultLocale, ["pitch"], ctx);
     requireDefaultLocaleKey(
+      config.about.intro,
+      config.defaultLocale,
+      ["about", "intro"],
+      ctx,
+    );
+    requireDefaultLocaleKey(
       config.contact.labels,
       config.defaultLocale,
       ["contact", "labels"],
@@ -124,6 +152,12 @@ export const SiteConfigSchema = z
 
     rejectUnknownLocaleKeys(config.role, codes, ["role"], ctx);
     rejectUnknownLocaleKeys(config.pitch, codes, ["pitch"], ctx);
+    rejectUnknownLocaleKeys(
+      config.about.intro,
+      codes,
+      ["about", "intro"],
+      ctx,
+    );
     rejectUnknownLocaleKeys(config.contact.labels, codes, ["contact", "labels"], ctx);
   });
 
@@ -244,6 +278,9 @@ export const LocaleStringsSchema = z.strictObject({
   }),
   hero: z.strictObject({
     aboutMe: z.string().min(1),
+    portfolio: z.string().min(1),
+    demo: z.string().min(1),
+    demoPhoto: z.string().min(1),
   }),
   projects: z.strictObject({
     empty: z.string().min(1),

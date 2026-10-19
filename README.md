@@ -86,6 +86,9 @@ the build fails with a clear path-specific error if a value is invalid.
 | `defaultLocale` | locale code | Must appear in `locales` |
 | `locales` | array | Each locale has `code`, `label`, `dir`, `htmlLang` |
 | `features` | object | Boolean feature flags |
+| `hero.photo` | site path or null | Hero portrait; null uses the demo avatar |
+| `hero.laptopFrames` | site path array or null | Scroll-scrub frame sequence; null uses the CSS demo laptop |
+| `about.intro` | localized string | About section copy and laptop-screen intro |
 | `contact.recipient` | email | Contact recipient |
 | `contact.labels` | localized string array | Contact reasons |
 
@@ -104,6 +107,38 @@ Set any flag to `false` to remove that part of the page:
 | `metrics` | Metrics panel, when project metrics exist |
 | `splash3d` | 3D hero card |
 | `laptop` | Scroll-driven laptop visual |
+
+### Laptop visual and frames
+
+The laptop visual lives in the About section. By default `hero.laptopFrames` is
+`null`, so the template renders a CSS 3D demo laptop whose lid opens with the
+scroll progress. Replace it with a frame sequence to use rendered artwork:
+
+```json
+{
+  "hero": {
+    "photo": null,
+    "laptopFrames": [
+      "/frames/frame-001.webp",
+      "/frames/frame-002.webp",
+      "/frames/frame-003.webp"
+    ]
+  }
+}
+```
+
+Paths are public URLs and must start with `/`. Put the files in
+`public/frames/` (or any public folder) and keep the order correct. Recommended:
+60–90 frames, WebP, and no more than 2.5 MB total. The component preloads every
+frame, draws the current frame into a fixed-aspect canvas with
+`object-fit: contain` behavior, and therefore does not shift layout. The list
+may also be `null` (or empty) to keep the CSS fallback.
+
+On screens wider than 750px, the section is pinned with GSAP ScrollTrigger and
+the visual eases toward the scroll target with exponential smoothing. On mobile
+the visual is not pinned: it plays once for about 1.8 seconds when it enters the
+viewport. With `prefers-reduced-motion: reduce`, the laptop is shown in its
+static open state with no pin or loop.
 
 ### Locales
 
