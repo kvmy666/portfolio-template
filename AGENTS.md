@@ -8,6 +8,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## FATAL RULE — testing ownership
+
+**NEVER LET AGENTS TEST. AUTOMATE TESTS ONLY.**
+
+Automated tests and CI are the only acceptance evidence. Agents may write or fix tests, but must not substitute manual/exploratory testing, UI inspection, or agent sign-off for automated evidence. Human-only checks belong to the owner or adopter.
+
 # Agent onboarding
 
 This repository is a reusable portfolio template, not a personal site. Your job

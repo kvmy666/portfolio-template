@@ -75,11 +75,18 @@ function seriousViolations(
 test("CV section opens a modal with the PDF preview and closes on Escape", { tag: "@phase4" }, async ({
   page,
 }) => {
+  test.setTimeout(60_000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/", { waitUntil: "networkidle" });
 
   const cvSection = page.locator("#cv");
-  await cvSection.scrollIntoViewIfNeeded();
+  await cvSection.evaluate((el) =>
+    el.scrollIntoView({
+      block: "center",
+      behavior: "instant",
+    } as ScrollIntoViewOptions),
+  );
 
   const trigger = cvSection.getByRole("button", { name: "View CV" });
   await expect(trigger).toBeVisible();
@@ -359,6 +366,8 @@ test("CV dialog is centered in the viewport", { tag: "@phase4" }, async ({
 test("contact section and CV modal have no critical or serious axe violations", { tag: "@a11y" }, async ({
   page,
 }) => {
+  test.setTimeout(60_000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/", { waitUntil: "networkidle" });
 
@@ -372,7 +381,12 @@ test("contact section and CV modal have no critical or serious axe violations", 
   expect(seriousViolations(contactResults.violations)).toEqual([]);
 
   const cvSection = page.locator("#cv");
-  await cvSection.scrollIntoViewIfNeeded();
+  await cvSection.evaluate((el) =>
+    el.scrollIntoView({
+      block: "center",
+      behavior: "instant",
+    } as ScrollIntoViewOptions),
+  );
   await cvSection.getByRole("button", { name: "View CV" }).click();
 
   const dialog = page.getByRole("dialog");

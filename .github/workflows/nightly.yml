@@ -1,18 +1,63 @@
 name: Nightly
+
 on:
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
+
+concurrency:
+  group: nightly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-chromium-webkit-firefox
+          restore-keys: |
+            playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-chromium-webkit-firefox
+            playwright-${{ runner.os }}-
+      - run: npm ci --prefer-offline --no-audit --no-fund
       - run: npx playwright install --with-deps chromium webkit firefox
       - run: npm run build
-      - run: npm run test:e2e
+      - run: npm run size
+      - name: Functional and accessibility tests
+        run: npx playwright test --grep-invert @fps --workers=3
+        env:
+          PLAYWRIGHT_SKIP_BUILD: "1"
+          PLAYWRIGHT_FIREFOX: "1"
+      - name: Frame budget tests
+        run: npx playwright test --project=chromium-desktop --grep @fps --workers=1
+        env:
+          PLAYWRIGHT_SKIP_BUILD: "1"
+      - name: Lighthouse
+        run: npm run lighthouse
+        env:
+          LHCI_NUMBER_OF_RUNS: "3"
+      - name: Upload test artifacts
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-test-results
+          path: |
+            test-results
+            playwright-report
+            .lighthouseci
+          retention-days: 7
+          if-no-files-found: ignore
