@@ -1,30 +1,41 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Arabic, Inter, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import type { ReactNode } from "react";
 
 import { siteConfig } from "../../site.config";
 import { defaultLocale, getLocaleConfig, localized } from "@/i18n";
 import "./globals.css";
 
-const displayFont = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+const display = localFont({
+  src: [
+    { path: "../fonts/space-grotesk-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/space-grotesk-600.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/space-grotesk-700.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-display",
   display: "swap",
+  preload: false,
 });
 
-const bodyFont = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const body = localFont({
+  src: [
+    { path: "../fonts/inter-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/inter-500.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/inter-600.woff2", weight: "600", style: "normal" },
+  ],
   variable: "--font-body",
   display: "swap",
+  preload: true,
 });
 
-const arabicFont = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "600"],
+const arabic = localFont({
+  src: [
+    { path: "../fonts/ibm-plex-sans-arabic-400.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/ibm-plex-sans-arabic-600.woff2", weight: "600", style: "normal" },
+  ],
   variable: "--font-arabic",
   display: "swap",
+  preload: false,
 });
 
 const localeConfig = getLocaleConfig(defaultLocale);
@@ -72,7 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       dir={localeConfig.dir}
       data-theme="dark"
       suppressHydrationWarning
-      className={`${displayFont.variable} ${bodyFont.variable} ${arabicFont.variable} h-full antialiased`}
+      className={`${display.variable} ${body.variable} ${arabic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <script dangerouslySetInnerHTML={{ __html: initScript }} />
