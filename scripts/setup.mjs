@@ -33,6 +33,11 @@ const DEFAULT_SITE = {
   website: null,
 };
 
+const DEFAULT_ABOUT_INTRO = {
+  en: "I turn ideas into fast, accessible products that people enjoy using.",
+  ar: "أحوّل الأفكار إلى منتجات سريعة وسهلة الوصول يستمتع الناس باستخدامها.",
+};
+
 const LOCALE_META = {
   en: { label: "English", dir: "ltr" },
   ar: { label: "العربية", dir: "rtl" },
@@ -195,6 +200,25 @@ function optionalSitePhoto(value) {
   }
 
   return text;
+}
+
+function laptopFrames(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!Array.isArray(value)) {
+    fail("hero.laptopFrames must be null or an array of site paths");
+  }
+
+  const frames = value.map((frame) => {
+    if (typeof frame !== "string" || !frame.trim().startsWith("/")) {
+      fail('Every hero.laptopFrames entry must start with "/"');
+    }
+    return frame.trim();
+  });
+
+  return frames.length > 0 ? frames : null;
 }
 
 function optionalUrl(value, label) {
@@ -599,6 +623,27 @@ function validateSite(site) {
     fail('hero.photo must be null or an absolute site path starting with "/"');
   }
 
+  if (site.hero.laptopFrames !== null) {
+    if (
+      !Array.isArray(site.hero.laptopFrames) ||
+      site.hero.laptopFrames.some(
+        (frame) => typeof frame !== "string" || !frame.startsWith("/"),
+      )
+    ) {
+      fail(
+        'hero.laptopFrames must be null or an array of site paths starting with "/"',
+      );
+    }
+  }
+
+  if (
+    !isPlainObject(site.about) ||
+    !isPlainObject(site.about.intro) ||
+    !requireText(site.about.intro.en, "About intro")
+  ) {
+    fail("about.intro needs an English value");
+  }
+
   for (const key of ["github", "linkedin", "website"]) {
     const value = site.links?.[key];
     if (value !== null && typeof value !== "string") {
@@ -860,6 +905,10 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
         options.photo !== undefined
           ? options.photo
           : (existingSite.hero?.photo ?? null),
+      laptopFrames: laptopFrames(existingSite.hero?.laptopFrames),
+      aboutIntro: isPlainObject(existingSite.about?.intro)
+        ? existingSite.about.intro
+        : DEFAULT_ABOUT_INTRO,
       features: {
         cv: existingBoolean(existingSite.features, "cv"),
         contact: existingBoolean(existingSite.features, "contact"),
@@ -886,6 +935,10 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
     options.photo !== undefined
       ? options.photo
       : (existingSite.hero?.photo ?? null);
+  answers.laptopFrames = laptopFrames(existingSite.hero?.laptopFrames);
+  answers.aboutIntro = isPlainObject(existingSite.about?.intro)
+    ? existingSite.about.intro
+    : DEFAULT_ABOUT_INTRO;
   answers.features = {
     cv: await askBoolean(
       rl,
@@ -930,6 +983,12 @@ function buildSite(existingSite, answers) {
   const labels = filteredLabels(existingSite.contact?.labels, answers.codes);
   labels.en = labels.en ?? ["Coop training"];
 
+  const aboutIntro = filteredLocalized(answers.aboutIntro, answers.codes);
+  aboutIntro.en = existingText(
+    isPlainObject(answers.aboutIntro) ? answers.aboutIntro.en : null,
+    DEFAULT_ABOUT_INTRO.en,
+  );
+
   const site = {
     name: requireText(answers.name, "Name"),
     role,
@@ -960,6 +1019,10 @@ function buildSite(existingSite, answers) {
     },
     hero: {
       photo: answers.photo ?? null,
+      laptopFrames: laptopFrames(answers.laptopFrames),
+    },
+    about: {
+      intro: aboutIntro,
     },
   };
 

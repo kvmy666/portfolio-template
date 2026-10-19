@@ -32,6 +32,10 @@ type SiteFixture = {
   };
   hero: {
     photo: string | null;
+    laptopFrames: string[] | null;
+  };
+  about: {
+    intro: Record<string, string>;
   };
 };
 
@@ -149,6 +153,78 @@ describe("SiteConfigSchema", () => {
     const withPhoto = validSite();
     withPhoto.hero.photo = "/demo/avatar.svg";
     expect(SiteConfigSchema.safeParse(withPhoto).success).toBe(true);
+  });
+
+  it("accepts null, empty, and absolute laptop frame paths", () => {
+    const noFrames = validSite();
+    noFrames.hero.laptopFrames = null;
+    expect(SiteConfigSchema.safeParse(noFrames).success).toBe(true);
+
+    const emptyFrames = validSite();
+    emptyFrames.hero.laptopFrames = [];
+    expect(SiteConfigSchema.safeParse(emptyFrames).success).toBe(true);
+
+    const withFrames = validSite();
+    withFrames.hero.laptopFrames = [
+      "/frames/frame-001.webp",
+      "/frames/frame-002.webp",
+    ];
+    expect(SiteConfigSchema.safeParse(withFrames).success).toBe(true);
+  });
+
+  it("rejects a relative laptop frame path", () => {
+    const fixture = validSite();
+    fixture.hero.laptopFrames = ["frames/frame-001.webp"];
+
+    const result = SiteConfigSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["hero", "laptopFrames", 0],
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("requires about.intro in the default locale", () => {
+    const fixture = validSite();
+    delete fixture.about.intro[fixture.defaultLocale];
+
+    const result = SiteConfigSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["about", "intro", fixture.defaultLocale],
+            message: expect.stringContaining("default locale"),
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("rejects about.intro locales that are not declared", () => {
+    const fixture = validSite();
+    fixture.about.intro.fr = "Bonjour";
+
+    const result = SiteConfigSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["about", "intro", "fr"],
+          }),
+        ]),
+      );
+    }
   });
 
   it("rejects a relative hero photo path", () => {

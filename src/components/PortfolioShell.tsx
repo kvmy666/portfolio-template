@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { useRef } from "react";
 
 import type {
   FeatureTag,
@@ -11,6 +12,7 @@ import type {
   SiteConfig,
 } from "@/content/schema";
 import { Dock } from "./Dock";
+import { LaptopScrub } from "./LaptopScrub";
 import { LocaleProvider, useLocale } from "./LocaleProvider";
 import { Utilities } from "./Utilities";
 
@@ -57,9 +59,12 @@ function PortfolioContent({
   year,
 }: Omit<PortfolioShellProps, "dictionaries">) {
   const { t, locale } = useLocale();
+  const aboutSectionRef = useRef<HTMLElement>(null);
   const features = site.features;
   const role = localized(site.role, locale, site.defaultLocale);
   const pitch = localized(site.pitch, locale, site.defaultLocale);
+  const aboutIntro =
+    localized(site.about.intro, locale, site.defaultLocale) || pitch;
   const contactLabels =
     site.contact.labels[locale] ??
     site.contact.labels[site.defaultLocale] ??
@@ -182,53 +187,68 @@ function PortfolioContent({
             </ul>
           </div>
 
-          <div className="hero-panel" data-hero-panel aria-hidden="true">
-            <div className="hero-panel-inner">
-              <div className="hero-splash-poster" />
-              {features.splash3d ? <HeroSplash /> : null}
-              <div
-                className="hero-photo"
-                style={{
-                  backgroundImage: `url(${JSON.stringify(heroPhoto)})`,
-                }}
-              />
-              <div className="hero-photo-fade" />
-              {showDemoPhotoCaption ? (
-                <span className="hero-demo-caption">{t.hero.demoPhoto}</span>
-              ) : null}
+          <div className="hero-panel-wrap">
+            <div className="hero-panel" data-hero-panel aria-hidden="true">
+              <div className="hero-panel-inner">
+                <div className="hero-splash-poster" />
+                {features.splash3d ? <HeroSplash /> : null}
+                <div
+                  className="hero-photo"
+                  style={{
+                    backgroundImage: `url(${JSON.stringify(heroPhoto)})`,
+                  }}
+                />
+                <div className="hero-photo-fade" />
+                {showDemoPhotoCaption ? (
+                  <span className="hero-demo-caption">{t.hero.demoPhoto}</span>
+                ) : null}
+              </div>
             </div>
           </div>
         </section>
 
-        <section id="about" className="mt-24">
-          <div className="rounded-xl border border-line bg-card p-8 shadow-sm sm:p-12">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div>
+        <section
+          id="about"
+          ref={aboutSectionRef}
+          className="about-section mt-24"
+        >
+          <div className="about-card rounded-xl border border-line bg-card p-8 shadow-sm sm:p-12">
+            <div className={features.laptop ? "about-grid" : undefined}>
+              <div className="about-copy">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-text">
                   {t.nav.about}
                 </p>
                 <h2 className="mt-3">{t.hero.aboutMe}</h2>
-                <p className="measure mt-4 text-muted">{pitch}</p>
-              </div>
-              {features.cv ? (
-                <a
-                  href="#cv"
-                  className="w-fit rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast transition hover:-translate-y-0.5"
-                >
-                  {t.cv.request}
-                </a>
-              ) : null}
-            </div>
+                <p className="measure mt-4 text-muted">{aboutIntro}</p>
 
-            <div className="mt-8 flex flex-wrap gap-2">
-              {contactLabels.map((label) => (
-                <span
-                  key={label}
-                  className="rounded-full border border-line bg-background px-3 py-1.5 text-sm text-muted"
-                >
-                  {label}
-                </span>
-              ))}
+                {features.cv ? (
+                  <a
+                    href="#cv"
+                    className="mt-8 inline-flex w-fit rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast transition hover:-translate-y-0.5"
+                  >
+                    {t.cv.request}
+                  </a>
+                ) : null}
+
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {contactLabels.map((label) => (
+                    <span
+                      key={label}
+                      className="rounded-full border border-line bg-background px-3 py-1.5 text-sm text-muted"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {features.laptop ? (
+                <LaptopScrub
+                  frames={site.hero.laptopFrames}
+                  intro={aboutIntro}
+                  pinTarget={aboutSectionRef}
+                />
+              ) : null}
             </div>
           </div>
         </section>

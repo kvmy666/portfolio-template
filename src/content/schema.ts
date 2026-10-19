@@ -47,6 +47,18 @@ const HeroSchema = z.strictObject({
     .trim()
     .regex(/^\//, "Hero photo paths must start with /")
     .nullable(),
+  laptopFrames: z
+    .array(
+      z
+        .string()
+        .trim()
+        .regex(/^\//, "Laptop frame paths must start with /"),
+    )
+    .nullable(),
+});
+
+const AboutSchema = z.strictObject({
+  intro: LocalizedStringSchema,
 });
 
 type IssueContext = {
@@ -101,6 +113,7 @@ export const SiteConfigSchema = z
     features: FeatureFlagsSchema,
     contact: ContactSchema,
     hero: HeroSchema,
+    about: AboutSchema,
   })
   .superRefine((config, ctx) => {
     const codes = config.locales.map((locale) => locale.code);
@@ -125,6 +138,12 @@ export const SiteConfigSchema = z
     requireDefaultLocaleKey(config.role, config.defaultLocale, ["role"], ctx);
     requireDefaultLocaleKey(config.pitch, config.defaultLocale, ["pitch"], ctx);
     requireDefaultLocaleKey(
+      config.about.intro,
+      config.defaultLocale,
+      ["about", "intro"],
+      ctx,
+    );
+    requireDefaultLocaleKey(
       config.contact.labels,
       config.defaultLocale,
       ["contact", "labels"],
@@ -133,6 +152,12 @@ export const SiteConfigSchema = z
 
     rejectUnknownLocaleKeys(config.role, codes, ["role"], ctx);
     rejectUnknownLocaleKeys(config.pitch, codes, ["pitch"], ctx);
+    rejectUnknownLocaleKeys(
+      config.about.intro,
+      codes,
+      ["about", "intro"],
+      ctx,
+    );
     rejectUnknownLocaleKeys(config.contact.labels, codes, ["contact", "labels"], ctx);
   });
 

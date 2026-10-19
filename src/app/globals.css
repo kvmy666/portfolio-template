@@ -173,6 +173,10 @@
     --dock-space: calc(6rem + env(safe-area-inset-bottom));
   }
 
+  .hero-panel-wrap {
+    width: min(100%, 26rem, calc(min(62vh, 520px) * 0.8));
+  }
+
   .page-main {
     padding-top: 3rem;
     padding-bottom: calc(var(--dock-space) + 2rem);
@@ -401,14 +405,31 @@
   }
 }
 
+.hero-panel-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  margin-inline: auto;
+}
+
+.hero-panel-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 8% 5% -3%;
+  z-index: 0;
+  border-radius: var(--radius-xl);
+  background: rgb(0 0 0 / 0.55);
+  filter: blur(26px);
+  pointer-events: none;
+}
+
 .hero-panel {
   --hero-cut: 20px;
 
   position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 26rem;
   aspect-ratio: 4 / 5;
-  margin-inline: auto;
   padding: 1px;
   border-radius: var(--radius-xl);
   background: linear-gradient(
@@ -423,7 +444,6 @@
     100% calc(100% - var(--hero-cut)),
     0 100%
   );
-  filter: drop-shadow(0 30px 48px rgb(0 0 0 / 0.38));
 }
 
 .hero-panel-inner {
@@ -538,30 +558,159 @@
   -webkit-backdrop-filter: blur(6px);
 }
 
-.laptop-screen {
-  border: 6px solid #171b18;
-  border-bottom-width: 4px;
-  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm)
-    var(--radius-sm);
-  background: #070d09;
-  box-shadow: 0 24px 45px -24px rgb(0 0 0 / 0.7);
+.about-grid {
+  display: grid;
+  gap: 2.5rem;
 }
 
-.laptop-base {
-  height: 0.7rem;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  background: linear-gradient(180deg, #222823, #0b110d);
-  box-shadow: 0 10px 24px -14px rgb(0 0 0 / 0.75);
+@media (min-width: 1024px) {
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center;
+  }
 }
 
-.laptop-base::after {
-  content: "";
+.about-copy {
+  max-width: 34rem;
+}
+
+.laptop-scrub {
+  --laptop-progress: 0;
+
+  position: relative;
+  width: 100%;
+  max-width: 36rem;
+  margin-inline: auto;
+  isolation: isolate;
+}
+
+.laptop-scrub-glow {
+  position: absolute;
+  inset: 14% 6% -8%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 40%,
+    color-mix(in srgb, var(--accent) 32%, transparent),
+    transparent 68%
+  );
+  filter: blur(38px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.laptop-frame-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(
+      circle at 30% 0%,
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(155deg, #07120b, #020805);
+  box-shadow: 0 32px 70px -34px rgb(0 0 0 / 0.8);
+}
+
+.laptop-frame-canvas {
+  position: absolute;
+  inset: 0;
   display: block;
-  width: 22%;
-  height: 0.22rem;
-  margin: 0 auto;
-  border-radius: var(--radius-full);
-  background: var(--muted);
+  width: 100%;
+  height: 100%;
+}
+
+.laptop-css-stage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  place-items: center;
+  perspective: 1100px;
+}
+
+.laptop-css {
+  position: relative;
+  width: 88%;
+  aspect-ratio: 16 / 10;
+  transform-style: preserve-3d;
+}
+
+.laptop-css-lid {
+  position: absolute;
+  inset: 2% 0 12% 0;
+  transform: rotateX(calc(-90deg + var(--laptop-progress, 0) * 105deg));
+  transform-origin: center bottom;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.laptop-css-face {
+  position: absolute;
+  inset: 0;
+  padding: 3%;
+  border-radius: var(--radius-md) var(--radius-md) var(--radius-sm)
+    var(--radius-sm);
+  background: linear-gradient(160deg, #2b332d, #101612 62%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 26px 50px -30px rgb(0 0 0 / 0.9);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.laptop-css-face-front {
+  transform: translateZ(1px);
+}
+
+.laptop-css-face-back {
+  transform: rotateY(180deg) translateZ(1px);
+}
+
+.laptop-css-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: clamp(0.5rem, 2.4vw, 1.15rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, #0b1f12);
+  border-radius: var(--radius-sm);
+  background:
+    radial-gradient(
+      circle at 18% 0%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(165deg, #07140c, #030906 72%);
+}
+
+.laptop-css-intro {
+  color: color-mix(in srgb, #baffd0 92%, white);
+  font-size: clamp(0.5rem, 1.35vw, 0.9rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.laptop-css-code {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+.laptop-css-cursor {
+  width: 0.45rem;
+  height: 0.8rem;
+  margin-top: 0.35rem;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--accent) 82%, white);
+  opacity: 0.7;
+  animation: laptop-cursor 1.2s steps(2, start) infinite;
 }
 
 .code-line {
@@ -570,32 +719,43 @@
   background: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
-.laptop-stage {
-  transform-origin: center bottom;
+.laptop-css-base {
+  position: absolute;
+  bottom: 0;
+  left: -3%;
+  right: -3%;
+  height: 13%;
+  border-radius: 0.35rem 0.35rem var(--radius-md) var(--radius-md);
+  background: linear-gradient(180deg, #3a423a, #171c18 52%, #090d0a);
+  box-shadow: 0 26px 40px -22px rgb(0 0 0 / 0.9);
+  transform: rotateX(62deg);
+  transform-origin: center top;
 }
 
-@supports (animation-timeline: view()) {
-  .laptop-stage {
-    animation: laptop-rise both;
-    animation-timeline: view();
-    animation-range: entry 10% cover 35%;
-  }
+.laptop-css-notch {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  width: 18%;
+  height: 18%;
+  border-radius: var(--radius-full);
+  background: #090d0a;
+  transform: translateX(-50%);
 }
 
-@keyframes laptop-rise {
-  from {
-    opacity: 0.5;
-    transform: translateY(28px) perspective(900px) rotateX(12deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) perspective(900px) rotateX(0);
+@keyframes laptop-cursor {
+  50% {
+    opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .laptop-scrub {
+    --laptop-progress: 1;
   }
 
   *,
@@ -607,11 +767,18 @@
     transition-delay: 0ms !important;
   }
 
-  .laptop-stage {
-    animation: none;
-  }
-
   .dock-indicator {
     transition: none;
   }
+}
+
+.laptop-css-mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--accent) 55%, #7f8a81);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
 }

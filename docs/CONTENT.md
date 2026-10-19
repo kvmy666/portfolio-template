@@ -20,6 +20,9 @@ clear error if it is invalid.
 | `defaultLocale` | locale code | Must appear in `locales` |
 | `locales` | locale array | Unique `code`, `label`, `dir`, `htmlLang` |
 | `features` | object | Five boolean feature flags |
+| `hero.photo` | site path or null | Hero portrait; null keeps the demo avatar |
+| `hero.laptopFrames` | site path array or null | Frame sequence for the About laptop scrub |
+| `about.intro` | localized string | About copy and the laptop screen intro |
 | `contact.recipient` | email | Contact form recipient |
 | `contact.labels` | localized string array | Reasons for contact |
 
@@ -34,6 +37,41 @@ Localized values are objects keyed by locale code:
 
 The default locale key is required. If a locale is missing, the UI falls back
 to the default locale.
+
+### About intro and laptop frames
+
+`about.intro` is used for the About section copy and is repeated inside the CSS
+laptop screen. It is not part of the UI dictionary, so each site owns its own
+wording:
+
+```json
+{
+  "about": {
+    "intro": {
+      "en": "I turn ideas into fast, accessible products...",
+      "ar": "أحوّل الأفكار إلى منتجات سريعة وسهلة الوصول..."
+    }
+  }
+}
+```
+
+`hero.laptopFrames` is either `null` or an ordered array of public paths:
+
+```json
+{
+  "hero": {
+    "photo": null,
+    "laptopFrames": ["/frames/frame-001.webp", "/frames/frame-002.webp"]
+  }
+}
+```
+
+Recommended: 60–90 WebP frames, no more than 2.5 MB total. Every path must
+start with `/` and point at a file under `public/`. The frames are preloaded and
+drawn into a fixed 16:10 canvas container, so the page does not shift. With
+`null` (the template default) the About section uses a CSS 3D laptop instead.
+Desktop pins the section and scrubs with GSAP; mobile auto-plays the opening
+once; reduced motion shows the open state immediately.
 
 ## Feature flags
 

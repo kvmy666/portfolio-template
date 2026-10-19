@@ -96,3 +96,76 @@ test.describe("hero splash", () => {
     expect(errors).toEqual([]);
   });
 });
+
+function readLaptopProgress(page: import("@playwright/test").Page) {
+  return page
+    .locator("[data-laptop-visual]")
+    .evaluate((element) =>
+      Number(
+        (element as HTMLElement).dataset.laptopProgress ??
+          (element as HTMLElement).style.getPropertyValue("--laptop-progress"),
+      ),
+    );
+}
+
+test("laptop scrub responds to desktop scroll", { tag: "@phase2" }, async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/", { waitUntil: "networkidle" });
+
+  const visual = page.locator("[data-laptop-visual]");
+  await expect(visual).toBeVisible();
+  await expect(visual).toHaveAttribute("data-laptop-mode", "css");
+  await expect(visual).toHaveAttribute("data-laptop-pinned", "true");
+
+  const aboutTop = await page.locator("#about").evaluate((element) => {
+    return element.getBoundingClientRect().top + window.scrollY;
+  });
+
+  await page.evaluate((scrollTop) => {
+    window.scrollTo(0, scrollTop);
+  }, aboutTop + 500);
+
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 5000 })
+    .toBeGreaterThan(0.15);
+
+  const progress = await readLaptopProgress(page);
+  expect(progress).toBeLessThanOrEqual(1);
+});
+
+test("laptop auto-plays once on mobile", { tag: "@phase2" }, async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "networkidle" });
+
+  const visual = page.locator("[data-laptop-visual]");
+  await expect(visual).toBeVisible();
+  await expect(visual).toHaveAttribute("data-laptop-autoplay", "true");
+  await expect(visual).not.toHaveAttribute("data-laptop-gsap", "true");
+
+  await page.evaluate(() => {
+    document.querySelector("#about")?.scrollIntoView({ block: "center" });
+  });
+
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 4000 })
+    .toBeGreaterThanOrEqual(0.99);
+  await expect(visual).toHaveAttribute("data-laptop-autoplayed", "true");
+});
+
+test("reduced motion opens the laptop statically", { tag: "@phase2" }, async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/", { waitUntil: "networkidle" });
+
+  const visual = page.locator("[data-laptop-visual]");
+  await expect(visual).toBeVisible();
+  await expect(visual).toHaveAttribute("data-laptop-pinned", "false");
+  await expect(visual).toHaveAttribute("data-laptop-autoplay", "false");
+  await expect.poll(() => readLaptopProgress(page)).toBeCloseTo(1, 3);
+});
