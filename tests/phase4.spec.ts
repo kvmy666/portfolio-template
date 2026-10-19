@@ -185,30 +185,35 @@ test("contact form posts JSON, shows success, and resets", { tag: "@phase4" }, a
   await expect(page).toHaveURL(/\/$/);
 });
 
-test("contact API rate limits after five requests per window", { tag: "@phase4" }, async ({
-  request,
-}) => {
-  const headers = {
-    "content-type": "application/json",
-    "x-forwarded-for": "203.0.113.77",
-  };
+test.describe("contact API rate limiting", () => {
+  test.describe.configure({ mode: "serial" });
 
-  for (let attempt = 1; attempt <= 5; attempt += 1) {
-    const response = await request.post("/api/contact", {
+  test("contact API rate limits after five requests per window", { tag: "@phase4" }, async ({
+    request,
+  }) => {
+    const ip = `10.${Math.floor(Math.random() * 200) + 1}.${Math.floor(Math.random() * 200) + 1}.${Math.floor(Math.random() * 200) + 1}`;
+    const headers = {
+      "content-type": "application/json",
+      "x-forwarded-for": ip,
+    };
+
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      const response = await request.post("/api/contact", {
+        headers,
+        data: contactPayload,
+      });
+
+      expect(response.status()).toBe(202);
+    }
+
+    const limited = await request.post("/api/contact", {
       headers,
       data: contactPayload,
     });
 
-    expect(response.status()).toBe(202);
-  }
-
-  const limited = await request.post("/api/contact", {
-    headers,
-    data: contactPayload,
+    expect(limited.status()).toBe(429);
+    expect(Number(limited.headers()["retry-after"])).toBeGreaterThan(0);
   });
-
-  expect(limited.status()).toBe(429);
-  expect(Number(limited.headers()["retry-after"])).toBeGreaterThan(0);
 });
 
 test("contact API accepts the honeypot without sending", { tag: "@phase4" }, async ({

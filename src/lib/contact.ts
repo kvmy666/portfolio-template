@@ -8,8 +8,6 @@ export const contactRequestSchema = z.object({
   company: z.string().max(200).optional(),
 });
 
-export type ContactRequest = z.infer<typeof contactRequestSchema>;
-
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
 export function isAllowedOrigin(
