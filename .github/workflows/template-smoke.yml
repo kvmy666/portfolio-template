@@ -1,8 +1,55 @@
 name: Template smoke
+
 on: [pull_request]
+
+concurrency:
+  group: template-smoke-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
 jobs:
-  smoke:
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      template: ${{ steps.changed.outputs.template }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect relevant changes
+        id: changed
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "template=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA"); then
+            echo "template=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if printf '%s\n' "$changed" | grep -Eq '^(src/|content/|public/|scripts/|site\.config\.ts|package(-lock)?\.json|next\.config|playwright\.config|postcss\.config|tsconfig|eslint\.config|lighthouserc\.js|\.github/workflows/template-smoke\.yml)'; then
+            echo "template=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "template=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  smoke:
+    needs: changes
+    if: needs.changes.outputs.template == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +68,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm ci --prefer-offline --no-audit --no-fund
       - run: node scripts/setup.mjs --yes --projects=${{ matrix.projects }} --langs=${{ matrix.langs }}
       - run: npm run build
+      - run: npm run size

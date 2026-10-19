@@ -1,23 +1,72 @@
 name: Template clone
-on: [pull_request]
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - scripts/**
+      - site.config.ts
+      - "content/**"
+      - "src/**"
+      - "next.config.*"
+      - "playwright.config.ts"
+      - "tests/**"
+      - .github/workflows/template-clone.yml
+  workflow_dispatch:
+
+concurrency:
+  group: template-clone-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
 jobs:
   clone:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - name: Clone the PR commit into a clean directory
+      - name: Export the committed tree into a clean directory
         run: |
-          git clone https://github.com/${{ github.repository }}.git /tmp/portfolio
-          cd /tmp/portfolio
-          git fetch origin ${{ github.event.pull_request.head.sha }}
-          git checkout ${{ github.event.pull_request.head.sha }}
+          mkdir -p /tmp/portfolio
+          git archive --format=tar HEAD | tar -x -C /tmp/portfolio
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
       - name: Install, set up, build
         working-directory: /tmp/portfolio
         run: |
-          npm ci
+          npm ci --prefer-offline --no-audit --no-fund
           node scripts/setup.mjs --yes --projects=3 --langs=en,ar
           npm run build
+      - name: Install Chromium
+        working-directory: /tmp/portfolio
+        run: npx playwright install --with-deps chromium
+      - name: Smoke test
+        working-directory: /tmp/portfolio
+        run: npx playwright test tests/smoke.spec.ts --project=chromium-desktop --workers=1
+        env:
+          PLAYWRIGHT_SKIP_BUILD: "1"
+      - name: Upload test artifacts
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-clone-test-results
+          path: |
+            /tmp/portfolio/test-results
+            /tmp/portfolio/playwright-report
+          retention-days: 7
+          if-no-files-found: ignore
