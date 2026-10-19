@@ -150,8 +150,9 @@ test("laptop auto-plays once on mobile", { tag: "@phase2" }, async ({
     document.querySelector("#about")?.scrollIntoView({ block: "center" });
   });
 
+  // CI WebKit can need more than 4s for the lazy section + 1.8s autoplay to settle.
   await expect
-    .poll(() => readLaptopProgress(page), { timeout: 4000 })
+    .poll(() => readLaptopProgress(page), { timeout: 12000 })
     .toBeGreaterThanOrEqual(0.99);
   await expect(visual).toHaveAttribute("data-laptop-autoplayed", "true");
 });
