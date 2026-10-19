@@ -128,6 +128,12 @@
   }
 }
 
+html[lang="ar"] {
+  --font-body: var(--font-arabic);
+  --font-display: var(--font-arabic);
+  letter-spacing: 0;
+}
+
 .measure {
   max-width: var(--measure);
 }

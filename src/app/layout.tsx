@@ -21,7 +21,7 @@ const body = localFont({
   ],
   variable: "--font-body",
   display: "swap",
-  preload: true,
+  preload: false,
 });
 
 const arabic = localFont({
