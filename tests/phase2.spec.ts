@@ -147,7 +147,10 @@ test("laptop auto-plays once on mobile", { tag: "@phase2" }, async ({
   await expect(visual).not.toHaveAttribute("data-laptop-gsap", "true");
 
   await page.evaluate(() => {
-    document.querySelector("#about")?.scrollIntoView({ block: "center" });
+    document.querySelector("#about")?.scrollIntoView({
+      block: "center",
+      behavior: "instant",
+    } as ScrollIntoViewOptions);
   });
 
   // CI WebKit can need more than 4s for the lazy section + 1.8s autoplay to settle.
