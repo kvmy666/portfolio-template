@@ -1,7 +1,35 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures";
+
+type SiteFixture = {
+  name: string;
+  email: string;
+  url: string;
+  role: Record<string, string>;
+  links: { github: string | null; linkedin: string | null };
+};
+
+const site = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), "content", "site.json"), "utf8"),
+) as SiteFixture;
+
+const projects = fs
+  .readdirSync(path.join(process.cwd(), "content", "projects"))
+  .filter((file) => file.endsWith(".json"))
+  .map((file) => {
+    const project = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "content", "projects", file),
+        "utf8",
+      ),
+    ) as { slug: string };
+    return project;
+  });
 
 const contactPayload = {
   name: "Demo Visitor",
@@ -196,6 +224,131 @@ test("contact API accepts the honeypot without sending", { tag: "@phase4" }, asy
 
   expect(response.status()).toBe(202);
   expect(await response.json()).toEqual({ ok: true });
+});
+
+
+test("switching to Arabic renders RTL copy and hides English headings", { tag: "@phase4" }, async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+
+  await page.getByRole("button", { name: /change language/i }).click();
+
+  const html = page.locator("html");
+  await expect(html).toHaveAttribute("dir", "rtl");
+  await expect(html).toHaveAttribute("lang", "ar");
+  await expect(
+    page.getByTestId("dock").getByRole("link", { name: "المشاريع" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "أعمال مختارة" }),
+  ).toBeVisible();
+  await expect(page.getByText("Selected work")).toHaveCount(0);
+});
+
+test("home and project pages declare canonical links", { tag: "@phase4" }, async ({
+  page,
+}) => {
+  const canonical = page.locator('link[rel="canonical"]');
+
+  await page.goto("/", { waitUntil: "networkidle" });
+  await expect(canonical).toHaveAttribute("href", site.url);
+
+  await page.goto("/projects/demo-project-one", { waitUntil: "networkidle" });
+  await expect(canonical).toHaveAttribute(
+    "href",
+    `${site.url}/projects/demo-project-one`,
+  );
+});
+
+test("sitemap lists home and every project while robots points to it", { tag: "@phase4" }, async ({
+  request,
+}) => {
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.status()).toBe(200);
+
+  const xml = await sitemap.text();
+  expect(xml).toContain(`${site.url}/`);
+  for (const project of projects) {
+    expect(xml).toContain(`${site.url}/projects/${project.slug}`);
+  }
+
+  const robots = await request.get("/robots.txt");
+  expect(robots.status()).toBe(200);
+  const robotsText = await robots.text();
+  expect(robotsText).toContain(`Sitemap: ${site.url}/sitemap.xml`);
+});
+
+test("generated Open Graph image is a non-empty PNG", { tag: "@phase4" }, async ({
+  request,
+}) => {
+  const response = await request.get("/opengraph-image");
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toContain("image/png");
+
+  const body = await response.body();
+  expect(body.byteLength).toBeGreaterThan(0);
+});
+
+test("Person JSON-LD is present and parses", { tag: "@phase4" }, async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+
+  const script = page.locator('script[type="application/ld+json"]');
+  await expect(script).toHaveCount(1);
+
+  const parsed = JSON.parse((await script.textContent()) ?? "null") as {
+    "@type": string;
+    name: string;
+    jobTitle: string;
+    url: string;
+    email: string;
+    sameAs: string[];
+  };
+
+  expect(parsed["@type"]).toBe("Person");
+  expect(parsed.name).toBe(site.name);
+  expect(parsed.jobTitle).toBe(site.role.en);
+  expect(parsed.url).toBe(site.url);
+  expect(parsed.email).toBe(site.email);
+  expect(parsed.sameAs).toEqual(
+    [site.links.github, site.links.linkedin].filter(
+      (link): link is string => link !== null,
+    ),
+  );
+});
+
+test("CV dialog is centered in the viewport", { tag: "@phase4" }, async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "networkidle" });
+
+  const cvSection = page.locator("#cv");
+  await cvSection.scrollIntoViewIfNeeded();
+  await cvSection.getByRole("button", { name: "View CV" }).click();
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+
+  const viewport = page.viewportSize();
+  const box = await dialog.boundingBox();
+
+  expect(viewport).not.toBeNull();
+  expect(box).not.toBeNull();
+
+  const horizontalGap = Math.abs(
+    box!.x - (viewport!.width - box!.width - box!.x),
+  );
+  const verticalGap = Math.abs(
+    box!.y - (viewport!.height - box!.height - box!.y),
+  );
+
+  expect(horizontalGap).toBeLessThanOrEqual(2);
+  expect(verticalGap).toBeLessThanOrEqual(2);
+  expect(box!.width).toBeLessThanOrEqual(960);
 });
 
 test("contact section and CV modal have no critical or serious axe violations", { tag: "@a11y" }, async ({

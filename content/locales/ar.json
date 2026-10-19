@@ -33,7 +33,9 @@
     "evidence": "الدليل",
     "noMedia": "لا توجد وسائط",
     "github": "GitHub",
-    "playStore": "Google Play"
+    "playStore": "Google Play",
+    "emptyLens": "لا توجد ميزات في هذا التصنيف.",
+    "openInNewTab": "فتح في علامة تبويب جديدة"
   },
   "platforms": {
     "web": "ويب",
@@ -83,7 +85,8 @@
       "email": "أدخل بريدًا إلكترونيًا صالحًا.",
       "label": "اختر موضوعًا.",
       "message": "اكتب رسالة بين 10 و2000 حرف."
-    }
+    },
+    "company": "الشركة"
   },
   "footer": {
     "rights": "جميع الحقوق محفوظة.",

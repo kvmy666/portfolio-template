@@ -795,9 +795,12 @@ html[lang="ar"] {
 /* ---------- CV dialog ---------- */
 
 .cv-dialog {
-  width: min(56rem, calc(100vw - 2rem));
-  max-width: 56rem;
-  max-height: calc(100svh - 2rem);
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(960px, 92vw);
+  max-width: min(960px, 92vw);
+  max-height: 90vh;
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -813,6 +816,10 @@ html[lang="ar"] {
 }
 
 .cv-dialog::backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgb(0 0 0 / 0.65);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

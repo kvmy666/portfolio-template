@@ -380,6 +380,8 @@ export const LocaleStringsSchema = z.strictObject({
     deepDive: z.string().min(1),
     lenses: z.string().min(1),
     all: z.string().min(1),
+    emptyLens: z.string().min(1),
+    openInNewTab: z.string().min(1),
     evidence: z.string().min(1),
     noMedia: z.string().min(1),
     github: z.string().min(1),
@@ -426,6 +428,7 @@ export const LocaleStringsSchema = z.strictObject({
     email: z.string().min(1),
     label: z.string().min(1),
     message: z.string().min(1),
+    company: z.string().min(1),
     success: z.string().min(1),
     error: z.string().min(1),
     errors: z.strictObject({

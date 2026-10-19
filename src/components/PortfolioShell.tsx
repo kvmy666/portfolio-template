@@ -236,6 +236,7 @@ function PortfolioContent({
                 <LaptopScrub
                   frames={site.hero.laptopFrames}
                   intro={aboutIntro}
+                  mark={t.visual.portfolio}
                   pinTarget={aboutSectionRef}
                 />
               ) : null}

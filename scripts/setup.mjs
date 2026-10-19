@@ -86,6 +86,8 @@ const DEFAULT_EN_STRINGS = {
     deepDive: "Deep-dive",
     lenses: "Lenses",
     all: "All",
+    emptyLens: "No features in this lens.",
+    openInNewTab: "Open in new tab",
     evidence: "Evidence",
     noMedia: "No media",
     github: "GitHub",
@@ -107,6 +109,10 @@ const DEFAULT_EN_STRINGS = {
     title: "Live metrics",
     github: "GitHub stars",
     mirror: "Mirror downloads",
+    downloads: "Downloads",
+    stars: "Stars",
+    downloadsSource: "Combined download count from GitHub and mirror releases.",
+    starsSource: "GitHub stargazers for the main repository.",
   },
   cv: {
     title: "Curriculum Vitae",
@@ -128,6 +134,7 @@ const DEFAULT_EN_STRINGS = {
     email: "Email",
     label: "Label",
     message: "Message",
+    company: "Company",
     success: "Thanks — your message has been sent.",
     error: "Something went wrong. Please try again or email me directly.",
     errors: {

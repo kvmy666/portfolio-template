@@ -9,6 +9,19 @@ Route Handler. If you choose static hosting, you must provide the contact
 endpoint separately (for example a Cloudflare Pages Function) or disable the
 contact feature.
 
+## Canonical domain
+
+Set `url` in `content/site.json` to the exact production origin before building.
+It must match the domain visitors use: the root layout uses it as
+`metadataBase`, and it produces canonical links, `/sitemap.xml`, `/robots.txt`,
+Open Graph URLs, JSON-LD, and the contact form's allowed origin.
+
+A mismatch (for example `https://example.com` in config but
+`https://www.example.com` in production) yields canonical and sitemap URLs for
+the wrong host and rejects same-origin contact submissions. If you switch
+domains, update `content/site.json`, rebuild, and deploy the new build. The
+generated `/opengraph-image` is static, so it also refreshes only on rebuild.
+
 ## Proposed target: OpenNext on Cloudflare
 
 The deployment design in [ADR-001](./adr/ADR-001-deploy.md) proposes

@@ -247,7 +247,7 @@ export function ContactForm({ labels }: ContactFormProps) {
       </div>
 
       <div className="contact-honeypot" aria-hidden="true">
-        <label htmlFor={`${formId}-company`}>Company</label>
+        <label htmlFor={`${formId}-company`}>{t.contact.company}</label>
         <input
           id={`${formId}-company`}
           name="company"

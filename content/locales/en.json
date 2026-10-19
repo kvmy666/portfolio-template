@@ -33,7 +33,9 @@
     "evidence": "Evidence",
     "noMedia": "No media",
     "github": "GitHub",
-    "playStore": "Google Play"
+    "playStore": "Google Play",
+    "emptyLens": "No features in this lens.",
+    "openInNewTab": "Open in new tab"
   },
   "platforms": {
     "web": "Web",
@@ -83,7 +85,8 @@
       "email": "Enter a valid email address.",
       "label": "Choose a subject.",
       "message": "Write a message between 10 and 2000 characters."
-    }
+    },
+    "company": "Company"
   },
   "footer": {
     "rights": "All rights reserved.",

@@ -204,6 +204,28 @@ full page reload and remember the choice in local storage. Add a locale to
 wizard creates new dictionary files by copying English and adding a `_todo`
 marker.
 
+## SEO and metadata
+
+`siteConfig.url` (from `content/site.json`) is the canonical public origin. Set
+it to the production domain before building; contact origin checks use it too.
+
+- `/sitemap.xml` is generated at build time from the home page and every
+  `content/projects/*.json` entry. Home has priority `1`; project pages use
+  `0.7`. `lastModified` is the build date.
+- `/robots.txt` allows all crawlers and points at
+  `<siteConfig.url>/sitemap.xml`.
+- `/opengraph-image` renders a static 1200×630 PNG from the site name, default
+  role, and pitch. It uses a system sans-serif and makes no network requests.
+- The root layout emits `canonical`, Open Graph, Twitter card, and a
+  schema.org `Person` JSON-LD script (`name`, `jobTitle`, `url`, `email`, and
+  GitHub/LinkedIn `sameAs`). Project pages override `canonical`, title,
+  description, and OG type `article`.
+- Every route has a unique title and description. Titles combine the page name
+  with the site name.
+
+Change `url`, `name`, `role`, or `pitch` in `content/site.json` and rebuild to
+regenerate all of the above. See `docs/CUSTOMIZE.md` for details.
+
 ## Content authoring
 
 Each file in `content/projects/` must validate against `ProjectSchema`:
