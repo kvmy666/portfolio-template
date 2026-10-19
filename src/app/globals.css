@@ -13,6 +13,7 @@
   --accent-strong: hsl(141 72% 42%);
   --accent-contrast: hsl(0 0% 4%);
   --primary-text: hsl(141 70% 55%);
+  --danger: hsl(0 80% 72%);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -36,6 +37,7 @@
   --accent-strong: hsl(141 72% 26%);
   --accent-contrast: hsl(0 0% 4%);
   --primary-text: hsl(141 72% 26%);
+  --danger: hsl(0 70% 32%);
 }
 
 @theme inline {
@@ -48,6 +50,7 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-contrast: var(--accent-contrast);
   --color-primary-text: var(--primary-text);
+  --color-danger: var(--danger);
 
   --font-sans: var(--font-body);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -787,4 +790,102 @@ html[lang="ar"] {
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.28em;
+}
+
+/* ---------- CV dialog ---------- */
+
+.cv-dialog {
+  width: min(56rem, calc(100vw - 2rem));
+  max-width: 56rem;
+  max-height: calc(100svh - 2rem);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 40px 120px -40px rgb(0 0 0 / 0.85);
+}
+
+.cv-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-dialog::backdrop {
+  background: rgb(0 0 0 / 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.cv-dialog-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.cv-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.cv-dialog-preview {
+  height: min(62vh, 40rem);
+  background: #ffffff;
+}
+
+.cv-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-height: 640px) {
+  .cv-dialog-preview {
+    height: 50vh;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cv-dialog[open] {
+    animation: cv-dialog-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cv-dialog[open]::backdrop {
+    animation: cv-backdrop-in 180ms ease-out;
+  }
+}
+
+@keyframes cv-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+  }
+}
+
+@keyframes cv-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Contact form ---------- */
+
+.contact-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

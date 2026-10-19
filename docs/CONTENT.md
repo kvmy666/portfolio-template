@@ -14,17 +14,19 @@ clear error if it is invalid.
 | `role` | localized string | The default locale key is required |
 | `pitch` | localized string | Short introduction |
 | `email` | email | Contact address |
+| `url` | URL | Public site URL used for canonical metadata and origin checks |
 | `links.github` | URL or null | Optional |
 | `links.linkedin` | URL or null | Optional |
 | `links.website` | URL or null | Optional |
 | `defaultLocale` | locale code | Must appear in `locales` |
 | `locales` | locale array | Unique `code`, `label`, `dir`, `htmlLang` |
 | `features` | object | Five boolean feature flags |
+| `cv.file` | site path or null | PDF shown in the CV modal and offered as a download |
 | `hero.photo` | site path or null | Hero portrait; null keeps the demo avatar |
 | `hero.laptopFrames` | site path array or null | Frame sequence for the About laptop scrub |
 | `about.intro` | localized string | About copy and the laptop screen intro |
 | `contact.recipient` | email | Contact form recipient |
-| `contact.labels` | localized string array | Reasons for contact |
+| `contact.labels` | localized string array | Options for the contact form Label field |
 
 Localized values are objects keyed by locale code:
 
@@ -73,12 +75,41 @@ drawn into a fixed 16:10 canvas container, so the page does not shift. With
 Desktop pins the section and scrubs with GSAP; mobile auto-plays the opening
 once; reduced motion shows the open state immediately.
 
+## CV
+
+`cv.file` points at a PDF under `public/` and must start with `/`, or be `null`
+to hide the CV even when `features.cv` is on. The demo ships a generic
+one-page `public/demo/cv.pdf`; replace it with your own file.
+
+The same PDF is used for both locales (CV content is not localized). The UI
+labels around it come from `content/locales/*.json` under `cv`. The section
+offers **View CV** (opens the native dialog preview), **Download** (the file
+`download` attribute), and **Open in new tab** inside the dialog.
+
+## Contact form
+
+The contact form appears when `features.contact` is on. It posts JSON to
+`/api/contact`; it does not use a `mailto:` link for submission.
+
+- `contact.labels[locale]` supplies the Label select options. The demo has one
+  option: `Coop training` / `تدريب تعاوني`.
+- `contact.recipient` is the default destination. Production can override it
+  with `CONTACT_TO`.
+- Field names, errors, success, and sending states are UI strings under
+  `contact` in the locale dictionaries. Keep them translated when you add a
+  locale.
+- A hidden `company` honeypot, origin check, Zod validation, and a 5 requests /
+  10 minute rate limit guard the endpoint. See `docs/DEPLOY.md`.
+
+`url` is the canonical public address of the site. It is also the allowed origin
+for the contact API (localhost is allowed for development).
+
 ## Feature flags
 
 | Flag | Effect |
 | --- | --- |
-| `cv` | Shows the CV request action |
-| `contact` | Shows the contact section and dock link |
+| `cv` | Shows the CV section when `cv.file` is set |
+| `contact` | Shows the contact form and dock link |
 | `metrics` | Shows live metrics when a project has sources or fallback values |
 | `splash3d` | Shows the 3D hero card |
 | `laptop` | Shows the scroll-driven laptop visual |
@@ -209,7 +240,8 @@ dictionary. Every dictionary contains:
 - `hero.aboutMe`
 - `projects.empty`
 - `projectDetail.*` (detail headings, lenses, and evidence labels)
-- `contact.submit`
+- `cv.*` (dialog title, preview, view, download, open-in-new-tab, close)
+- `contact.*` (field labels, submit/sending, success/error, and `contact.errors`)
 - `footer.rights`
 - optional `_meta` and `_todo` notes
 
@@ -218,10 +250,10 @@ When the wizard adds a language, it copies the English dictionary and adds a
 
 ## Demo assets
 
-`public/demo/logo-*.svg`, `public/demo/feature-*.svg`, and
+`public/demo/logo-*.svg`, `public/demo/feature-*.svg`, `public/demo/cv.pdf`, and
 `src/app/icon.svg` are generated artwork released under CC0. Replace them with
-your own assets, or keep the generated shapes. Update the `logo` and `media.src`
-paths in each project if you change the filenames.
+your own assets, or keep the generated shapes. Update the `logo`, `media.src`,
+and `cv.file` paths if you change the filenames.
 
 ## Privacy
 

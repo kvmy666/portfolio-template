@@ -13,8 +13,8 @@ content and assets.
 - Projects from 0 to N, read from `content/projects/*.json`
 - English-only or any locale, with right-to-left support
 - 3D hero card and a scroll-driven laptop scrub visual
-- Optional CV action, contact section, and live metrics
-- Feature flags for CV, contact, metrics, 3D splash, and laptop visuals
+- CV preview modal with download, plus a validated contact form and API
+- Optional CV, contact, metrics, 3D splash, and laptop feature flags
 - Zod-validated site config, projects, and locale dictionaries
 - Interactive setup wizard with non-interactive flags
 - Generated demo SVG assets released under CC0
@@ -82,15 +82,17 @@ the build fails with a clear path-specific error if a value is invalid.
 | `role` | localized string | Required in the default locale |
 | `pitch` | localized string | Required in the default locale |
 | `email` | email | Public contact address |
+| `url` | URL | Canonical site URL and allowed contact origin |
 | `links` | object | `github`, `linkedin`, and `website` are URL or null |
 | `defaultLocale` | locale code | Must appear in `locales` |
 | `locales` | array | Each locale has `code`, `label`, `dir`, `htmlLang` |
 | `features` | object | Boolean feature flags |
+| `cv.file` | site path or null | PDF previewed and downloaded in the CV section |
 | `hero.photo` | site path or null | Hero portrait; null uses the demo avatar |
 | `hero.laptopFrames` | site path array or null | Scroll-scrub frame sequence; null uses the CSS demo laptop |
 | `about.intro` | localized string | About section copy and laptop-screen intro |
 | `contact.recipient` | email | Contact recipient |
-| `contact.labels` | localized string array | Contact reasons |
+| `contact.labels` | localized string array | Options for the contact form Label field |
 
 Localized values are objects keyed by locale code. The default locale key is
 required. Unknown locales in site-level localized values are rejected, and
@@ -102,8 +104,8 @@ Set any flag to `false` to remove that part of the page:
 
 | Flag | Controls |
 | --- | --- |
-| `cv` | CV request action |
-| `contact` | Contact section and dock link |
+| `cv` | CV section with preview modal, download, and new-tab link |
+| `contact` | Contact form and dock link |
 | `metrics` | Live downloads and GitHub stars, with static fallbacks |
 | `splash3d` | 3D hero card |
 | `laptop` | Scroll-driven laptop visual |
@@ -150,6 +152,47 @@ the visual eases toward the scroll target with exponential smoothing. On mobile
 the visual is not pinned: it plays once for about 1.8 seconds when it enters the
 viewport. With `prefers-reduced-motion: reduce`, the laptop is shown in its
 static open state with no pin or loop.
+
+### CV
+
+Set `cv.file` to a PDF under `public/`; the path must start with `/`:
+
+```json
+{
+  "cv": { "file": "/cv/your-name.pdf" }
+}
+```
+
+The demo ships a generic `public/demo/cv.pdf`. The section renders when
+`features.cv` is on and `cv.file` is not `null`. **View CV** opens a native
+`<dialog>` with an iframe preview, an inner download, and an open-in-new-tab
+fallback. **Download** uses the file `download` attribute. The same PDF is used
+for every locale; only the surrounding UI labels are translated. Set
+`cv.file` to `null` to hide the CV while keeping the feature flag on.
+
+### Contact form
+
+With `features.contact` on, the contact section renders a client form (Name,
+Email, Label, Message) that posts JSON to `/api/contact`. Label options come from
+`contact.labels[locale]`; the demo uses `Coop training` / `تدريب تعاوني`.
+
+The endpoint validates with a shared Zod schema, checks the origin against
+`url`, ignores submissions with the hidden `company` honeypot, and allows 5
+requests per 10 minutes per IP. With `RESEND_API_KEY` set it sends through
+Resend using `CONTACT_FROM` / `CONTACT_TO` (recipient defaults to
+`contact.recipient`). Without a key, development returns a dev `202`; production
+returns `503`.
+
+For tests, `CONTACT_DEV_MODE=1` allows that dev `202` from a production server
+process. Do not set it in production. See `docs/DEPLOY.md` for the full status
+matrix and the Cloudflare KV note. Message bodies and email addresses are never
+logged, and no form data is placed in URLs.
+
+```bash
+RESEND_API_KEY=re_...
+CONTACT_FROM="Portfolio <you@example.com>"
+CONTACT_TO=you@example.com
+```
 
 ### Locales
 
@@ -240,18 +283,23 @@ reference and `docs/CUSTOMIZE.md` for theming and feature changes.
 
 ## Deployment
 
-Deployment is not implemented in Phase 0. The proposed target is a static
-export on Cloudflare Pages with Pages Functions for contact delivery. Read
-`docs/DEPLOY.md`, and treat `docs/adr/ADR-001-deploy.md` as **Proposed** until
-the static-export decision is accepted.
+The contact form needs a request-time server for `/api/contact`, so the default
+build runs as a Next.js server. The proposed Cloudflare target is **OpenNext on
+Cloudflare Workers** (see `docs/adr/ADR-001-deploy.md`). A pure static export
+would need a separate Pages Function for contact delivery or the contact feature
+turned off.
+
+Set `RESEND_API_KEY`, `CONTACT_FROM`, and `CONTACT_TO` as host secrets, and wire
+Cloudflare KV for the production rate limit (in-memory limits are per instance).
+Read `docs/DEPLOY.md` for the full matrix and static-export notes.
 
 ## License
 
 Code is licensed under the MIT License. See `LICENSE`.
 
-Demo assets are original generated SVG artwork dedicated to the public domain
-under CC0. Fonts are fetched at build time from Google Fonts under the SIL Open
-Font License. No third-party logos, screenshots, or media are bundled. See
+Demo assets are original generated SVG artwork and a generic demo CV PDF,
+dedicated to the public domain under CC0. Fonts are self-hosted under the SIL
+Open Font License. No third-party logos, screenshots, or media are bundled. See
 `NOTICE` for asset details.
 
 Copyright (c) 2026 Abdulkarim.

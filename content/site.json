@@ -9,6 +9,7 @@
     "ar": "أبني منتجات سريعة وسهلة الوصول للويب وAndroid."
   },
   "email": "you@example.com",
+  "url": "https://example.com",
   "links": {
     "github": "https://github.com/your-handle",
     "linkedin": "https://linkedin.com/in/your-handle",
@@ -46,6 +47,9 @@
         "تدريب تعاوني"
       ]
     }
+  },
+  "cv": {
+    "file": "/demo/cv.pdf"
   },
   "hero": {
     "photo": null,

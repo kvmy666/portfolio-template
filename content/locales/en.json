@@ -58,14 +58,32 @@
   },
   "cv": {
     "title": "Curriculum Vitae",
-    "body": "Request a copy of my CV and I will send it to you.",
-    "request": "Request CV",
-    "action": "Request a copy"
+    "body": "View or download a copy of my CV.",
+    "request": "View CV",
+    "action": "View CV",
+    "view": "View CV",
+    "download": "Download",
+    "openInNewTab": "Open in new tab",
+    "close": "Close CV preview",
+    "preview": "CV preview"
   },
   "contact": {
     "submit": "Send message",
+    "sending": "Sending…",
     "title": "Start a conversation",
-    "subjectFallback": "Hello"
+    "subjectFallback": "Hello",
+    "name": "Name",
+    "email": "Email",
+    "label": "Label",
+    "message": "Message",
+    "success": "Thanks — your message has been sent.",
+    "error": "Something went wrong. Please try again or email me directly.",
+    "errors": {
+      "name": "Enter your name (2–80 characters).",
+      "email": "Enter a valid email address.",
+      "label": "Choose a subject.",
+      "message": "Write a message between 10 and 2000 characters."
+    }
   },
   "footer": {
     "rights": "All rights reserved.",

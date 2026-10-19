@@ -28,10 +28,13 @@ const DEFAULT_SITE = {
   role: "Software Engineer",
   pitch: "I build fast, accessible products for the web and Android.",
   email: "you@example.com",
+  url: "https://example.com",
   github: "https://github.com/your-handle",
   linkedin: "https://linkedin.com/in/your-handle",
   website: null,
 };
+
+const DEFAULT_CV_FILE = "/demo/cv.pdf";
 
 const DEFAULT_ABOUT_INTRO = {
   en: "I turn ideas into fast, accessible products that people enjoy using.",
@@ -107,14 +110,32 @@ const DEFAULT_EN_STRINGS = {
   },
   cv: {
     title: "Curriculum Vitae",
-    body: "Request a copy of my CV and I will send it to you.",
-    request: "Request CV",
-    action: "Request a copy",
+    body: "View or download a copy of my CV.",
+    request: "View CV",
+    action: "View CV",
+    view: "View CV",
+    download: "Download",
+    openInNewTab: "Open in new tab",
+    close: "Close CV preview",
+    preview: "CV preview",
   },
   contact: {
     submit: "Send message",
+    sending: "Sending…",
     title: "Start a conversation",
     subjectFallback: "Hello",
+    name: "Name",
+    email: "Email",
+    label: "Label",
+    message: "Message",
+    success: "Thanks — your message has been sent.",
+    error: "Something went wrong. Please try again or email me directly.",
+    errors: {
+      name: "Enter your name (2–80 characters).",
+      email: "Enter a valid email address.",
+      label: "Choose a subject.",
+      message: "Write a message between 10 and 2000 characters.",
+    },
   },
   footer: {
     rights: "All rights reserved.",
@@ -138,7 +159,7 @@ const DEFAULT_EN_STRINGS = {
   },
 };
 
-const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--photo=/path] [--force]
+const USAGE = `Usage: npm run setup [-- --yes] [--projects=N] [--langs=en|en,ar|en,es] [--name=...] [--email=...] [--url=...] [--cv=/path] [--photo=/path] [--force]
 
 Options:
   --yes              Use safe defaults and skip prompts
@@ -146,6 +167,8 @@ Options:
   --langs=en[,code]  English only, or English plus one locale
   --name=NAME        Override the display name
   --email=EMAIL      Override the contact email
+  --url=URL          Override the public site URL (http or https)
+  --cv=/path         Absolute site path for the CV PDF (blank clears it)
   --photo=/path      Absolute site path for the hero photo (blank clears it)
   --force            Allow replacing a demo path that holds a real project
   --help             Show this help`;
@@ -215,6 +238,31 @@ function optionalSitePhoto(value) {
   return text;
 }
 
+function optionalCvFile(value) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const text = String(value).trim();
+  if (!text) {
+    return null;
+  }
+
+  if (!text.startsWith("/")) {
+    fail('cv.file must be null or an absolute site path starting with "/"');
+  }
+
+  return text;
+}
+
+function savedCvFile(existingSite) {
+  if (isPlainObject(existingSite.cv) && Object.hasOwn(existingSite.cv, "file")) {
+    return optionalCvFile(existingSite.cv.file);
+  }
+
+  return DEFAULT_CV_FILE;
+}
+
 function laptopFrames(value) {
   if (value === null || value === undefined) {
     return null;
@@ -256,6 +304,17 @@ function optionalUrl(value, label) {
   }
 
   return url.toString();
+}
+
+function requireSiteUrl(value, label) {
+  const text = requireText(value, label);
+  const url = optionalUrl(text, label);
+
+  if (!url) {
+    fail(`${label} must be a valid absolute URL`);
+  }
+
+  return url;
 }
 
 function parseProjects(value) {
@@ -308,6 +367,8 @@ function parseArgs(argv) {
     langs: null,
     name: null,
     email: null,
+    url: null,
+    cv: undefined,
     photo: undefined,
   };
 
@@ -326,6 +387,13 @@ function parseArgs(argv) {
       options.name = requireText(argument.slice("--name=".length), "Name");
     } else if (argument.startsWith("--email=")) {
       options.email = requireEmail(argument.slice("--email=".length));
+    } else if (argument.startsWith("--url=")) {
+      options.url = requireSiteUrl(
+        argument.slice("--url=".length),
+        "Site URL",
+      );
+    } else if (argument.startsWith("--cv=")) {
+      options.cv = optionalCvFile(argument.slice("--cv=".length));
     } else if (argument.startsWith("--photo=")) {
       options.photo = optionalSitePhoto(argument.slice("--photo=".length));
     } else {
@@ -582,6 +650,7 @@ function validateSite(site) {
   requireText(site.name, "Name");
   requireEmail(site.email);
   requireEmail(site.contact?.recipient);
+  requireSiteUrl(site.url, "Site URL");
 
   if (site.defaultLocale !== "en") {
     fail("The setup wizard requires English (en) as the default locale");
@@ -624,6 +693,16 @@ function validateSite(site) {
     if (typeof site.features?.[key] !== "boolean") {
       fail(`Feature flag "${key}" must be a boolean`);
     }
+  }
+
+  if (!isPlainObject(site.cv)) {
+    fail("cv must be an object with a file value");
+  }
+  if (
+    site.cv.file !== null &&
+    (typeof site.cv.file !== "string" || !site.cv.file.startsWith("/"))
+  ) {
+    fail('cv.file must be null or an absolute site path starting with "/"');
   }
 
   if (!isPlainObject(site.hero)) {
@@ -975,6 +1054,7 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
       name,
       role,
       email,
+      url: options.url ?? existingSite.url ?? DEFAULT_SITE.url,
       codes: currentCodes,
       projectCount: options.projects ?? projectCount,
       github,
@@ -983,6 +1063,10 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
         options.photo !== undefined
           ? options.photo
           : (existingSite.hero?.photo ?? null),
+      cvFile:
+        options.cv !== undefined
+          ? options.cv
+          : savedCvFile(existingSite),
       laptopFrames: laptopFrames(existingSite.hero?.laptopFrames),
       aboutIntro: isPlainObject(existingSite.about?.intro)
         ? existingSite.about.intro
@@ -1007,6 +1091,22 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
     options.projects ?? (await askProjectCount(rl, projectCount));
   answers.codes = options.langs ?? (await askLocaleCodes(rl, currentCodes));
   answers.email = options.email ?? requireEmail(await ask(rl, "Email", email));
+  answers.url =
+    options.url ??
+    requireSiteUrl(
+      await ask(rl, "Site URL", existingSite.url ?? DEFAULT_SITE.url),
+      "Site URL",
+    );
+  const currentCvFile = savedCvFile(existingSite);
+  const cvAnswer = await ask(
+    rl,
+    'CV PDF path (blank keeps, "-" clears)',
+    currentCvFile ?? "-",
+  );
+  answers.cvFile = options.cv;
+  if (answers.cvFile === undefined) {
+    answers.cvFile = cvAnswer === "-" ? null : optionalCvFile(cvAnswer);
+  }
   answers.github = await askOptionalUrl(rl, "GitHub URL", github);
   answers.linkedin = await askOptionalUrl(rl, "LinkedIn URL", linkedin);
   answers.photo =
@@ -1072,6 +1172,7 @@ function buildSite(existingSite, answers) {
     role,
     pitch,
     email: requireEmail(answers.email),
+    url: requireSiteUrl(answers.url, "Site URL"),
     links: {
       github: optionalUrl(answers.github, "GitHub URL"),
       linkedin: optionalUrl(answers.linkedin, "LinkedIn URL"),
@@ -1094,6 +1195,9 @@ function buildSite(existingSite, answers) {
     contact: {
       recipient: requireEmail(answers.email),
       labels,
+    },
+    cv: {
+      file: optionalCvFile(answers.cvFile ?? null),
     },
     hero: {
       photo: answers.photo ?? null,

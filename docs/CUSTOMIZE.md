@@ -23,8 +23,9 @@ Edit `content/site.json`:
 }
 ```
 
-The flags control the CV action, contact section, metrics panel, 3D hero card,
-and laptop visual. The page remains usable with every flag disabled.
+The flags control the CV section, contact form, metrics panel, 3D hero card,
+and laptop visual. The CV section also requires `cv.file`; the contact form
+posts to `/api/contact`. The page remains usable with every flag disabled.
 
 ## Navigation and copy
 
@@ -53,10 +54,10 @@ layout reads `htmlLang` and `dir` from the default locale in
 
 ## Demo assets
 
-Replace the generated SVGs in `public/demo/` and update each project's `logo`
-path. The application icon is `src/app/icon.svg`. Do not add third-party logos
-or media unless you have the rights to redistribute them, and update `NOTICE`
-when required.
+Replace the generated SVGs and `public/demo/cv.pdf` in `public/demo/` and update
+each project's `logo` path plus `cv.file`. The application icon is
+`src/app/icon.svg`. Do not add third-party logos or media unless you have the
+rights to redistribute them, and update `NOTICE` when required.
 
 ## Validation
 

@@ -1,29 +1,37 @@
-# ADR-003: Rate limiting with Cloudflare KV
+# ADR-003: Rate limiting: in-memory development, Cloudflare KV production
 
 ## Context
 
 A public contact endpoint can be abused for spam and email-quota exhaustion.
-The static site has no database. The deployment target proposed in ADR-001
-already provides Cloudflare KV.
+The site has no database. Development and tests need to run without Cloudflare
+bindings, while a deployed Worker needs a limit shared across instances.
 
 ## Decision
 
-Propose rate limiting contact requests with Cloudflare KV. The Pages Function
-increments a short-lived counter keyed by a privacy-preserving client identifier
-and rejects requests that exceed a fixed window limit.
+Use a fixed-window limiter of **5 requests per 10 minutes** per client IP.
 
-The limit is intentionally conservative for a personal portfolio. Responses do
-not reveal whether an address is blocked or whether a counter exists.
+- **Development and tests** use a module-level `Map` attached to `globalThis`
+  so it survives Next.js HMR. This is per process and is not a production
+  guarantee.
+- **Production on Cloudflare** uses a KV namespace
+  (`RATE_LIMIT_KV_NAMESPACE_ID`) with the same limit and window. Keys should use
+  a privacy-preserving identifier such as a hash of the IP, not the raw address.
+  KV is eventually consistent, so the limit is approximate under concurrency.
+- The endpoint fails closed with `429` when a request is over the limit and
+  returns `Retry-After`. It does not reveal whether an address is blocked.
+
+Store entries expire with the window. A KV outage must not silently disable the
+limiter; the endpoint should fail closed while the static site remains
+available.
 
 ## Consequences
 
-- Rate limiting stays close to the contact endpoint and needs no database.
-- KV is eventually consistent, so limits are approximate under concurrency.
-- The implementation must avoid storing raw IP addresses in keys.
-- A KV outage should fail closed for the contact endpoint while leaving the
-  static site available.
+- Local development and Playwright need no KV binding.
+- The in-memory limiter is not shared between server instances and does not
+  survive restarts.
+- Production requires a KV binding and hashed keys.
+- KV is eventually consistent, so limits may be exceeded briefly.
 - Limits may need adjustment if legitimate traffic is blocked.
-- Rate limiting is not implemented in Phase 0.
 
 ## Status
 

@@ -12,6 +12,8 @@ import type {
   SiteConfig,
 } from "@/content/schema";
 import { AppFrame } from "./AppFrame";
+import { ContactForm } from "./ContactForm";
+import { CVModal } from "./CVModal";
 import { LaptopScrub } from "./LaptopScrub";
 import { useLocale } from "./LocaleProvider";
 import { ProjectMetrics } from "./ProjectMetrics";
@@ -78,6 +80,7 @@ function PortfolioContent({
     [];
   const heroPhoto = site.hero.photo ?? "/demo/avatar.svg";
   const showDemoPhotoCaption = site.hero.photo === null;
+  const cvFile = features.cv ? site.cv.file : null;
 
   const socialLinks = [
     site.links.github
@@ -108,12 +111,7 @@ function PortfolioContent({
     0,
   );
 
-  const mailtoHref = `mailto:${site.email}?subject=${encodeURIComponent(
-    contactLabels[0] ?? t.contact.subjectFallback,
-  )}`;
-  const cvMailto = `mailto:${site.email}?subject=${encodeURIComponent(
-    t.cv.request,
-  )}`;
+  const mailtoHref = `mailto:${site.email}`;
 
   const projectCountLabel = (
     projects.length === 1 ? t.projects.countOne : t.projects.countMany
@@ -147,7 +145,7 @@ function PortfolioContent({
               >
                 {t.hero.aboutMe}
               </a>
-              {features.cv ? (
+              {cvFile ? (
                 <a
                   href="#cv"
                   className="inline-flex items-center rounded-full px-5 py-3 text-sm font-semibold text-muted transition hover:text-primary-text"
@@ -213,7 +211,7 @@ function PortfolioContent({
                 <h2 className="mt-3">{t.hero.aboutMe}</h2>
                 <p className="measure mt-4 text-muted">{aboutIntro}</p>
 
-                {features.cv ? (
+                {cvFile ? (
                   <a
                     href="#cv"
                     className="mt-8 inline-flex w-fit rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast transition hover:-translate-y-0.5"
@@ -387,17 +385,12 @@ function PortfolioContent({
           )}
         </section>
 
-        {features.cv ? (
+        {cvFile ? (
           <section id="cv" className="mt-24">
             <div className="rounded-xl border border-line bg-card p-8 shadow-sm sm:p-12">
               <h2>{t.cv.title}</h2>
               <p className="measure mt-4 text-muted">{t.cv.body}</p>
-              <a
-                href={cvMailto}
-                className="mt-8 inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast transition hover:-translate-y-0.5"
-              >
-                {t.cv.action}
-              </a>
+              <CVModal file={cvFile} />
             </div>
           </section>
         ) : null}
@@ -409,33 +402,23 @@ function PortfolioContent({
                 className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl"
                 aria-hidden="true"
               />
-              <div className="measure relative">
+              <div className="relative">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-text">
                   {t.nav.contact}
                 </p>
                 <h2 className="mt-3">{t.contact.title}</h2>
-                <p className="mt-4 text-muted">{pitch}</p>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
+                <p className="measure mt-4 text-muted">{pitch}</p>
+                <div className="max-w-2xl">
+                  <ContactForm key={locale} labels={contactLabels} />
+                </div>
+                <p className="mt-6 text-sm text-muted">
                   <a
                     href={mailtoHref}
-                    className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast shadow-lg shadow-accent/20 transition hover:-translate-y-0.5"
+                    className="transition hover:text-primary-text"
                   >
-                    {t.contact.submit}
+                    {site.email}
                   </a>
-                  <span className="text-sm text-muted">{site.email}</span>
-                </div>
-                {contactLabels.length > 0 ? (
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {contactLabels.map((label) => (
-                      <span
-                        key={label}
-                        className="rounded-full border border-line bg-background px-3 py-1.5 text-sm text-muted"
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
+                </p>
               </div>
             </div>
           </section>
