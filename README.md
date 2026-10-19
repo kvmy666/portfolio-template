@@ -166,12 +166,24 @@ Each file in `content/projects/` must validate against `ProjectSchema`:
   "tech": ["TypeScript", "Next.js"],
   "features": [
     {
-      "title": { "en": "Fast by default" },
+      "title": { "en": "Fast first paint" },
+      "oneLiner": { "en": "A server-rendered shell reaches the screen quickly." },
       "description": { "en": "Why this feature matters." },
-      "tags": ["Performance", "UX"]
+      "tags": ["Performance", "UX"],
+      "media": {
+        "src": "/demo/feature-1.svg",
+        "alt": { "en": "Abstract dashboard with a fast-loading page skeleton." },
+        "type": "image"
+      },
+      "evidence": { "en": "Measured with a performance budget on every build." }
     }
   ],
   "metrics": null,
+  "sources": { "github": null, "mirror": null },
+  "deepDive": {
+    "architecture": { "en": "A server-rendered app with validated content." },
+    "code": { "language": "TypeScript", "snippet": "export const value = 1;" }
+  },
   "repo": null,
   "store": null,
   "packageId": null,
@@ -185,11 +197,28 @@ Rules and conventions:
 - Projects sort by `order`, then by slug.
 - Every localized string needs the default locale key.
 - `platform` is `web`, `android`, `ios`, or `cross-platform`.
-- `features[].tags` accepts `UX`, `Security`, `Testing`, and `Performance`.
+- Each feature needs `title`, `oneLiner`, `description`, and one or more unique
+  tags from `UX`, `Security`, `Testing`, and `Performance`.
+- `features[].media` is `null` or `{ "src": "/path", "alt": localized, "type": "image" | "video" }`.
+  Keep videos muted, looping, `playsInline`, six seconds or shorter, and at most
+  2.5 MB. Keep images at or below 1.5 MB. Prefer WebM over GIF.
+- `features[].evidence` is `null` or a localized note about what was checked and
+  how.
 - `metrics` is `null` or `{ "github": number | null, "mirror": number | null }`.
+  These are static fallbacks until live metrics land.
+- `sources` holds optional repository slugs: `{ "github": null, "mirror": null }`.
+- `deepDive` holds optional architecture copy and a short code sample:
+  `{ "architecture": localized | null, "code": { "language", "snippet" } | null }`.
 - Set `demo: false` for real work. The wizard never overwrites real projects
   unless you pass `--force`.
 - An empty projects folder is valid and renders the localized empty state.
+
+Each project renders at `/projects/<slug>` in a fixed block order: header,
+overview, tech stack, features (with lens filters), and deep-dive. Lens filters
+include `All`, `UX`, `Security`, `Testing`, and `Performance`; a deep link such
+as `/projects/<slug>#security` selects a lens without navigating. Project
+content intentionally has no CTA, retrospective, or review/publication status
+blocks.
 
 The UI dictionary in `content/locales/*.json` holds navigation, hero, empty
 state, contact, and footer strings. See `docs/CONTENT.md` for the complete

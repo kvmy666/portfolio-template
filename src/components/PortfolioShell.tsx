@@ -2,28 +2,34 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { useRef } from "react";
 
 import type {
-  FeatureTag,
   LocaleStrings,
   LocalizedString,
   Project,
   SiteConfig,
 } from "@/content/schema";
-import { Dock } from "./Dock";
+import { AppFrame } from "./AppFrame";
 import { LaptopScrub } from "./LaptopScrub";
-import { LocaleProvider, useLocale } from "./LocaleProvider";
-import { Utilities } from "./Utilities";
+import { useLocale } from "./LocaleProvider";
 
 const HeroSplash = dynamic(() => import("./HeroSplash"), { ssr: false });
 
-const tagStyles: Record<FeatureTag, string> = {
-  UX: "border border-accent/30 bg-accent/10 text-primary-text",
-  Security: "border border-line bg-background text-muted",
-  Testing: "border border-accent/20 bg-accent/5 text-primary-text",
-  Performance: "border border-accent/40 bg-accent/15 text-primary-text",
-};
+function GithubMark() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.51 2.87 8.33 6.84 9.68.5.1.68-.22.68-.49 0-.24-.01-1.05-.01-1.9-2.78.62-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.23 10.23 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z" />
+    </svg>
+  );
+}
 
 function localized(
   value: LocalizedString,
@@ -47,9 +53,9 @@ export function PortfolioShell({
   year,
 }: PortfolioShellProps) {
   return (
-    <LocaleProvider site={site} dictionaries={dictionaries}>
+    <AppFrame site={site} dictionaries={dictionaries}>
       <PortfolioContent site={site} projects={projects} year={year} />
-    </LocaleProvider>
+    </AppFrame>
   );
 }
 
@@ -113,22 +119,7 @@ function PortfolioContent({
   ).replace("{count}", projects.length.toLocaleString(locale));
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-clip">
-      <div
-        className="page-glow pointer-events-none fixed inset-0 -z-10"
-        aria-hidden="true"
-      />
-
-      <a
-        href="#main"
-        className="sr-only z-50 rounded-md bg-accent px-4 py-2 font-medium text-accent-contrast focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
-      >
-        {t.ui.skipToContent}
-      </a>
-
-      <Utilities />
-      <Dock features={features} />
-
+    <>
       <main id="main" className="page-main page-container flex-1">
         <section id="home" className="hero-grid">
           <div>
@@ -306,103 +297,100 @@ function PortfolioContent({
                     : project.platform;
 
                 return (
-                  <article
-                    key={project.slug}
-                    className="group flex h-full flex-col rounded-lg border border-line bg-card p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={project.logo}
-                          alt=""
-                          width={52}
-                          height={52}
-                          unoptimized
-                          className="h-12 w-12 rounded-md border border-line bg-background object-contain"
-                        />
-                        <div>
-                          <h3>{localized(project.name, locale, site.defaultLocale)}</h3>
-                          <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-muted">
-                            {t.platforms[platformKey]}
-                          </p>
-                        </div>
-                      </div>
-                      {project.demo ? (
-                        <span className="rounded-full border border-line bg-background px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted">
-                          {t.projects.demo}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <p className="mt-5 flex-1 text-sm leading-6 text-muted">
-                      {localized(project.summary, locale, site.defaultLocale)}
-                    </p>
-
-                    <ul className="mt-5 flex flex-wrap gap-1.5">
-                      {project.tech.map((technology) => (
-                        <li
-                          key={technology}
-                          className="rounded-full border border-line bg-background px-2.5 py-1 text-xs text-muted"
-                        >
-                          {technology}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <ul className="mt-5 space-y-2.5 border-t border-line pt-5">
-                      {project.features.slice(0, 2).map((feature) => (
-                        <li
-                          key={localized(
-                            feature.title,
-                            locale,
-                            site.defaultLocale,
-                          )}
-                        >
-                          <p className="text-sm font-medium">
-                            {localized(
-                              feature.title,
-                              locale,
-                              site.defaultLocale,
-                            )}
-                          </p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                            {feature.tags.map((tag) => (
+                  <article key={project.slug} className="h-full">
+                    <Link
+                      href={`/projects/${project.slug}`}
+                      data-testid="showcase-card"
+                      className="group flex h-full flex-col rounded-lg border border-line bg-card p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col items-center gap-1.5">
+                            <Image
+                              src={project.logo}
+                              alt=""
+                              width={52}
+                              height={52}
+                              unoptimized
+                              className="h-12 w-12 rounded-md border border-line bg-background object-contain"
+                            />
+                            {project.repo ? (
                               <span
-                                key={tag}
-                                className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] ${tagStyles[tag]}`}
+                                className="inline-flex text-muted"
+                                title={t.projectDetail.github}
+                                data-testid="showcase-github"
                               >
-                                {t.tags[tag]}
+                                <GithubMark />
+                                <span className="sr-only">
+                                  {t.projectDetail.github}
+                                </span>
                               </span>
-                            ))}
+                            ) : null}
                           </div>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {project.repo || project.store ? (
-                      <div className="mt-5 flex flex-wrap gap-3 text-sm font-medium">
-                        {project.repo ? (
-                          <a
-                            href={project.repo}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-primary-text hover:underline"
-                          >
-                            {t.projects.repository}
-                          </a>
-                        ) : null}
-                        {project.store ? (
-                          <a
-                            href={project.store}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-primary-text hover:underline"
-                          >
-                            {t.projects.store}
-                          </a>
+                          <div>
+                            <h3>
+                              {localized(
+                                project.name,
+                                locale,
+                                site.defaultLocale,
+                              )}
+                            </h3>
+                            <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-muted">
+                              {t.platforms[platformKey]}
+                            </p>
+                          </div>
+                        </div>
+                        {project.demo ? (
+                          <span className="rounded-full border border-line bg-background px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted">
+                            {t.projects.demo}
+                          </span>
                         ) : null}
                       </div>
-                    ) : null}
+
+                      <p className="mt-5 flex-1 text-sm leading-6 text-muted">
+                        {localized(project.summary, locale, site.defaultLocale)}
+                      </p>
+
+                      <ul className="mt-5 flex flex-wrap gap-1.5">
+                        {project.tech.map((technology) => (
+                          <li
+                            key={technology}
+                            className="rounded-full border border-line bg-background px-2.5 py-1 text-xs text-muted"
+                          >
+                            {technology}
+                          </li>
+                        ))}
+                      </ul>
+
+                      {project.metrics ? (
+                        <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5 text-sm">
+                          <div>
+                            <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted">
+                              {t.metrics.github}
+                            </dt>
+                            <dd className="mt-1 font-semibold">
+                              {project.metrics.github === null
+                                ? "—"
+                                : project.metrics.github.toLocaleString(
+                                    locale,
+                                  )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted">
+                              {t.metrics.mirror}
+                            </dt>
+                            <dd className="mt-1 font-semibold">
+                              {project.metrics.mirror === null
+                                ? "—"
+                                : project.metrics.mirror.toLocaleString(
+                                    locale,
+                                  )}
+                            </dd>
+                          </div>
+                        </dl>
+                      ) : null}
+                    </Link>
                   </article>
                 );
               })}
@@ -473,6 +461,6 @@ function PortfolioContent({
           <p>{t.footer.builtWith}</p>
         </div>
       </footer>
-    </div>
+    </>
   );
 }

@@ -13,6 +13,7 @@ import type { SiteConfig } from "@/content/schema";
 import { useLocale } from "./LocaleProvider";
 
 type DockItemId = "home" | "about" | "projects" | "contact";
+export type { DockItemId };
 type SpySectionId = DockItemId | "cv";
 
 type DockItem = {
@@ -114,25 +115,39 @@ const icons: Record<DockItemId, ReactNode> = {
   contact: <ContactIcon />,
 };
 
-export function Dock({ features }: { features: SiteConfig["features"] }) {
+export function Dock({
+  features,
+  activeOverride,
+  hrefPrefix = "",
+}: {
+  features: SiteConfig["features"];
+  activeOverride?: DockItemId;
+  hrefPrefix?: string;
+}) {
   const { t, dir } = useLocale();
   const dockRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<Partial<Record<DockItemId, HTMLAnchorElement | null>>>(
     {},
   );
-  const [active, setActive] = useState<SpySectionId>("home");
+  const [active, setActive] = useState<SpySectionId>(activeOverride ?? "home");
   const [indicator, setIndicator] = useState<IndicatorBox | null>(null);
 
   const items = useMemo<DockItem[]>(
     () => [
-      { id: "home", href: "#home", label: t.nav.home },
-      { id: "about", href: "#about", label: t.nav.about },
-      { id: "projects", href: "#projects", label: t.nav.projects },
+      { id: "home", href: `${hrefPrefix}#home`, label: t.nav.home },
+      { id: "about", href: `${hrefPrefix}#about`, label: t.nav.about },
+      { id: "projects", href: `${hrefPrefix}#projects`, label: t.nav.projects },
       ...(features.contact
-        ? [{ id: "contact" as const, href: "#contact", label: t.nav.contact }]
+        ? [
+            {
+              id: "contact" as const,
+              href: `${hrefPrefix}#contact`,
+              label: t.nav.contact,
+            },
+          ]
         : []),
     ],
-    [features.contact, t.nav],
+    [features.contact, hrefPrefix, t.nav],
   );
 
   const spyIds = useMemo<SpySectionId[]>(
@@ -147,6 +162,10 @@ export function Dock({ features }: { features: SiteConfig["features"] }) {
   );
 
   useEffect(() => {
+    if (activeOverride) {
+      return;
+    }
+
     const elements = spyIds
       .map((id) => document.getElementById(id))
       .filter((element): element is HTMLElement => element !== null);
@@ -178,9 +197,10 @@ export function Dock({ features }: { features: SiteConfig["features"] }) {
     elements.forEach((element) => observer.observe(element));
 
     return () => observer.disconnect();
-  }, [spyIds]);
+  }, [activeOverride, spyIds]);
 
-  const dockActive: DockItemId = active === "cv" ? "projects" : active;
+  const dockActive: DockItemId =
+    activeOverride ?? (active === "cv" ? "projects" : active);
 
   const measure = useCallback(() => {
     const dock = dockRef.current;

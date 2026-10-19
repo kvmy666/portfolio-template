@@ -7,31 +7,95 @@
     "ar": "إدخال تطبيق أندرويد تجريبي في شبكة المشاريع."
   },
   "description": {
-    "en": "A second placeholder project with an Android focus. Use it to check platform labels, tech chips, and feature tags.",
-    "ar": "مشروع نموذجي ثانٍ يركز على أندرويد. استخدمه لفحص تسميات المنصات وشرائح التقنيات ووسوم الميزات."
+    "en": "A second placeholder project with an Android focus. Use it to check platform labels, feature lenses, and the deep-dive block.",
+    "ar": "مشروع نموذجي ثانٍ يركز على أندرويد. استخدمه لفحص تسميات المنصات وعدسات الميزات وقسم النظرة المعمّقة."
   },
   "order": 2,
   "platform": "android",
-  "tech": ["Kotlin", "Jetpack Compose"],
+  "tech": ["Kotlin", "Jetpack Compose", "Room"],
   "features": [
     {
       "title": { "en": "Offline-first flow", "ar": "تجربة تعمل دون اتصال" },
-      "description": {
-        "en": "Core screens remain useful without a connection.",
-        "ar": "تبقى الشاشات الأساسية مفيدة دون اتصال بالشبكة."
+      "oneLiner": {
+        "en": "Core screens stay useful without a connection.",
+        "ar": "تبقى الشاشات الأساسية مفيدة دون اتصال."
       },
-      "tags": ["UX", "Performance"]
+      "description": {
+        "en": "Local storage is the source of truth and sync runs in the background.",
+        "ar": "التخزين المحلي هو مصدر الحقيقة وتعمل المزامنة في الخلفية."
+      },
+      "tags": ["UX", "Performance"],
+      "media": {
+        "src": "/demo/feature-4.svg",
+        "alt": {
+          "en": "Abstract phone screen with an offline sync indicator.",
+          "ar": "شاشة هاتف تجريدية مع مؤشر مزامنة دون اتصال."
+        },
+        "type": "image"
+      },
+      "evidence": {
+        "en": "State restoration is exercised on every UI test run.",
+        "ar": "يُختبر استعادة الحالة في كل تشغيل لاختبارات الواجهة."
+      }
     },
     {
       "title": { "en": "Intentional permissions", "ar": "أذونات مدروسة" },
-      "description": {
+      "oneLiner": {
         "en": "Every permission maps to a visible product need.",
         "ar": "كل إذن مرتبط بحاجة واضحة في المنتج."
       },
-      "tags": ["Security"]
+      "description": {
+        "en": "Permissions are requested at the moment of use with a plain-language reason.",
+        "ar": "تُطلب الأذونات لحظة الاستخدام مع سبب واضح بلغة بسيطة."
+      },
+      "tags": ["Security"],
+      "media": {
+        "src": "/demo/feature-5.svg",
+        "alt": {
+          "en": "Abstract lock shield beside a permission prompt.",
+          "ar": "درع قفل تجريدي بجانب طلب إذن."
+        },
+        "type": "image"
+      },
+      "evidence": null
+    },
+    {
+      "title": { "en": "Release checks", "ar": "فحوص الإصدار" },
+      "oneLiner": {
+        "en": "A repeatable checklist runs before every release.",
+        "ar": "قائمة تحقق قابلة للتكرار تُنفذ قبل كل إصدار."
+      },
+      "description": {
+        "en": "Build, lint, and device smoke tests must pass before an artifact is promoted.",
+        "ar": "يجب أن تنجح عمليات البناء والفحص واختبارات الجهاز قبل ترقية أي إصدار."
+      },
+      "tags": ["Testing", "Performance"],
+      "media": {
+        "src": "/demo/feature-6.svg",
+        "alt": {
+          "en": "Abstract test runner with passing check rows.",
+          "ar": "منفذ اختبارات تجريدي مع صفوف تحقق ناجحة."
+        },
+        "type": "image"
+      },
+      "evidence": {
+        "en": "The release workflow records every check and its duration.",
+        "ar": "يسجل سير عمل الإصدار كل فحص ومدته."
+      }
     }
   ],
   "metrics": null,
+  "sources": { "github": null, "mirror": null },
+  "deepDive": {
+    "architecture": {
+      "en": "Compose screens observe a repository backed by Room. Background sync writes through the same repository so the UI has one data path.",
+      "ar": "تراقب شاشات Compose مستودعًا مدعومًا بـRoom. تكتب المزامنة الخلفية عبر المستودع نفسه ليكون للواجهة مسار بيانات واحد."
+    },
+    "code": {
+      "language": "TypeScript",
+      "snippet": "type SyncState = \"idle\" | \"running\" | \"failed\";\n\nexport function nextState(current: SyncState, online: boolean): SyncState {\n  if (!online) return current === \"running\" ? \"failed\" : current;\n  return \"running\";\n}"
+    }
+  },
   "repo": null,
   "store": null,
   "packageId": null,
