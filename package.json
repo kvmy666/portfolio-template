@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/first-load-budget.mjs",
     "start": "next start",
     "lint": "eslint",
     "setup": "node scripts/setup.mjs",
@@ -53,9 +53,16 @@
   },
   "size-limit": [
     {
-      "name": "JS chunks",
-      "path": ".next/static/chunks/**/*.js",
-      "limit": "220 kB"
+      "name": "First-load JS (/ initial chunks)",
+      "path": ".next/first-load/home/**/*.js",
+      "limit": "180 kB",
+      "gzip": true
+    },
+    {
+      "name": "First-load JS (/projects/[slug] initial chunks)",
+      "path": ".next/first-load/project/**/*.js",
+      "limit": "180 kB",
+      "gzip": true
     },
     {
       "name": "CSS",

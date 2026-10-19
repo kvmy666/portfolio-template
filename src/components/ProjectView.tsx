@@ -128,6 +128,7 @@ function ProjectContent({
     <main id="main" className="page-main page-container flex-1">
       <div className="mb-8">
         <Link
+          prefetch={false}
           href="/#projects"
           className="inline-flex items-center gap-2 text-sm font-medium text-muted transition hover:text-primary-text"
         >
