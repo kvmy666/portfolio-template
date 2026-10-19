@@ -8,9 +8,7 @@ import "./globals.css";
 
 const display = localFont({
   src: [
-    { path: "../fonts/space-grotesk-500.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/space-grotesk-600.woff2", weight: "600", style: "normal" },
-    { path: "../fonts/space-grotesk-700.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/space-grotesk-variable.woff2", weight: "300 700", style: "normal" },
   ],
   variable: "--font-display",
   display: "swap",
@@ -19,9 +17,7 @@ const display = localFont({
 
 const body = localFont({
   src: [
-    { path: "../fonts/inter-400.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/inter-500.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/inter-600.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/inter-variable.woff2", weight: "100 900", style: "normal" },
   ],
   variable: "--font-body",
   display: "swap",
