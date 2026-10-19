@@ -92,7 +92,8 @@ jobs:
       - name: Lighthouse
         run: npm run lighthouse
         env:
-          LHCI_NUMBER_OF_RUNS: "1"
+          # 3-run median; a single Lighthouse run is too noisy for a blocking gate.
+          LHCI_NUMBER_OF_RUNS: "3"
       - name: Upload test artifacts
         if: failure() || cancelled()
         uses: actions/upload-artifact@v4
