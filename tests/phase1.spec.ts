@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 type LocaleConfig = {
   code: string;

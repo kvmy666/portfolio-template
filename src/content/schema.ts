@@ -168,8 +168,18 @@ export const featureTagSchema = z.enum([
   "Performance",
 ]);
 
+export const MediaSchema = z.strictObject({
+  src: z
+    .string()
+    .trim()
+    .regex(/^\//, "Media paths must start with /"),
+  alt: LocalizedStringSchema,
+  type: z.enum(["image", "video"]),
+});
+
 export const ProjectFeatureSchema = z.strictObject({
   title: LocalizedStringSchema,
+  oneLiner: LocalizedStringSchema,
   description: LocalizedStringSchema,
   tags: z
     .array(featureTagSchema)
@@ -177,11 +187,36 @@ export const ProjectFeatureSchema = z.strictObject({
     .refine((tags) => new Set(tags).size === tags.length, {
       message: "Feature tags must be unique",
     }),
+  media: MediaSchema.nullable(),
+  evidence: LocalizedStringSchema.nullable(),
 });
 
 const ProjectMetricsSchema = z.strictObject({
   github: z.number().int().nonnegative().nullable(),
   mirror: z.number().int().nonnegative().nullable(),
+});
+
+const repositorySlugSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/,
+    "Repository sources must be full owner/repo slugs",
+  );
+
+export const ProjectSourcesSchema = z.strictObject({
+  github: repositorySlugSchema.nullable(),
+  mirror: repositorySlugSchema.nullable(),
+});
+
+export const ProjectCodeSchema = z.strictObject({
+  language: z.string().trim().min(1),
+  snippet: z.string().min(1),
+});
+
+export const ProjectDeepDiveSchema = z.strictObject({
+  architecture: LocalizedStringSchema.nullable(),
+  code: ProjectCodeSchema.nullable(),
 });
 
 const platformSchema = z.enum(["web", "android", "ios", "cross-platform"]);
@@ -205,6 +240,8 @@ export function createProjectSchema(defaultLocale: string) {
       tech: z.array(z.string().trim().min(1)).min(1),
       features: z.array(ProjectFeatureSchema).min(1),
       metrics: ProjectMetricsSchema.nullable(),
+      sources: ProjectSourcesSchema,
+      deepDive: ProjectDeepDiveSchema,
       repo: z.url().nullable(),
       store: z.url().nullable(),
       packageId: z.string().trim().min(1).nullable(),
@@ -228,12 +265,45 @@ export function createProjectSchema(defaultLocale: string) {
           ctx,
         );
         requireDefaultLocaleKey(
+          feature.oneLiner,
+          defaultLocale,
+          ["features", index, "oneLiner"],
+          ctx,
+        );
+        requireDefaultLocaleKey(
           feature.description,
           defaultLocale,
           ["features", index, "description"],
           ctx,
         );
+
+        if (feature.media) {
+          requireDefaultLocaleKey(
+            feature.media.alt,
+            defaultLocale,
+            ["features", index, "media", "alt"],
+            ctx,
+          );
+        }
+
+        if (feature.evidence) {
+          requireDefaultLocaleKey(
+            feature.evidence,
+            defaultLocale,
+            ["features", index, "evidence"],
+            ctx,
+          );
+        }
       });
+
+      if (project.deepDive.architecture) {
+        requireDefaultLocaleKey(
+          project.deepDive.architecture,
+          defaultLocale,
+          ["deepDive", "architecture"],
+          ctx,
+        );
+      }
     });
 }
 
@@ -292,6 +362,19 @@ export const LocaleStringsSchema = z.strictObject({
     repository: z.string().min(1),
     store: z.string().min(1),
   }),
+  projectDetail: z.strictObject({
+    backToProjects: z.string().min(1),
+    overview: z.string().min(1),
+    techStack: z.string().min(1),
+    features: z.string().min(1),
+    deepDive: z.string().min(1),
+    lenses: z.string().min(1),
+    all: z.string().min(1),
+    evidence: z.string().min(1),
+    noMedia: z.string().min(1),
+    github: z.string().min(1),
+    playStore: z.string().min(1),
+  }),
   platforms: z.strictObject({
     web: z.string().min(1),
     android: z.string().min(1),
@@ -308,6 +391,10 @@ export const LocaleStringsSchema = z.strictObject({
     title: z.string().min(1),
     github: z.string().min(1),
     mirror: z.string().min(1),
+    downloads: z.string().min(1),
+    stars: z.string().min(1),
+    downloadsSource: z.string().min(1),
+    starsSource: z.string().min(1),
   }),
   cv: z.strictObject({
     title: z.string().min(1),
@@ -347,7 +434,11 @@ export type SiteConfig = z.infer<typeof SiteConfigSchema>;
 export type SiteConfigInput = z.input<typeof SiteConfigSchema>;
 export type LocalizedString = z.infer<typeof LocalizedStringSchema>;
 export type FeatureTag = z.infer<typeof featureTagSchema>;
+export type Media = z.infer<typeof MediaSchema>;
 export type ProjectFeature = z.infer<typeof ProjectFeatureSchema>;
+export type ProjectSources = z.infer<typeof ProjectSourcesSchema>;
+export type ProjectCode = z.infer<typeof ProjectCodeSchema>;
+export type ProjectDeepDive = z.infer<typeof ProjectDeepDiveSchema>;
 export type Project = z.infer<typeof ProjectSchema>;
 export type ProjectInput = z.input<typeof ProjectSchema>;
 export type LocaleStrings = z.infer<typeof LocaleStringsSchema>;

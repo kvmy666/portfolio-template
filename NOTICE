@@ -10,9 +10,19 @@ original generated artwork created for this template. They are dedicated to the
 public domain under CC0 1.0.
 
 Fonts
-Space Grotesk, Inter, and IBM Plex Sans Arabic are provided by Google Fonts and
-licensed under the SIL Open Font License 1.1 (OFL). They are fetched and
-subset at build time through next/font.
+The following fonts are self-hosted in src/fonts/ and are not fetched at build
+time or at runtime. All are licensed under the SIL Open Font License 1.1 (OFL);
+the full license text is in src/fonts/OFL.txt.
+
+- Inter (latin subset, weights 400/500/600)
+  Copyright 2016 The Inter Project Authors.
+- Space Grotesk (latin subset, weights 500/600/700)
+  Copyright 2018 The Space Grotesk Project Authors.
+- IBM Plex Sans Arabic (arabic subset, weights 400/600)
+  Copyright 2017 IBM Corp. All rights reserved.
+
+The WOFF2 files were produced by the Google Fonts API latin/arabic subsets and
+are redistributed unmodified under the OFL.
 
 No third-party logos, screenshots, or media are bundled with this template.
 The demo persona and project entries are fictional.

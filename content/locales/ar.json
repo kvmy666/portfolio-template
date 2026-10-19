@@ -22,6 +22,19 @@
     "repository": "المستودع",
     "store": "المتجر"
   },
+  "projectDetail": {
+    "backToProjects": "العودة إلى المشاريع",
+    "overview": "نظرة عامة",
+    "techStack": "التقنيات",
+    "features": "الميزات",
+    "deepDive": "نظرة معمّقة",
+    "lenses": "العدسات",
+    "all": "الكل",
+    "evidence": "الدليل",
+    "noMedia": "لا توجد وسائط",
+    "github": "GitHub",
+    "playStore": "Google Play"
+  },
   "platforms": {
     "web": "ويب",
     "android": "أندرويد",
@@ -37,7 +50,11 @@
   "metrics": {
     "title": "مؤشرات مباشرة",
     "github": "نجوم GitHub",
-    "mirror": "تنزيلات المرآة"
+    "mirror": "تنزيلات المرآة",
+    "downloads": "التنزيلات",
+    "stars": "النجوم",
+    "downloadsSource": "إجمالي التنزيلات من إصدارات GitHub والمرآة.",
+    "starsSource": "عدد النجوم على مستودع GitHub الرئيسي."
   },
   "cv": {
     "title": "السيرة الذاتية",

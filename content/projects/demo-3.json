@@ -7,8 +7,8 @@
     "ar": "أداة تجريبية متعددة المنصات بقائمة ميزات مختصرة."
   },
   "description": {
-    "en": "A third placeholder project for the template. It demonstrates a cross-platform card and a short description.",
-    "ar": "مشروع نموذجي ثالث للقالب. يعرض بطاقة متعددة المنصات ووصفًا مختصرًا."
+    "en": "A third placeholder project for the template. It demonstrates a cross-platform card and the feature lens filters.",
+    "ar": "مشروع نموذجي ثالث للقالب. يعرض بطاقة متعددة المنصات ومرشحات عدسات الميزات."
   },
   "order": 3,
   "platform": "cross-platform",
@@ -16,22 +16,80 @@
   "features": [
     {
       "title": { "en": "Shared core", "ar": "نواة مشتركة" },
-      "description": {
+      "oneLiner": {
         "en": "One tested core serves every platform target.",
         "ar": "نواة واحدة مختبرة تخدم كل منصات الاستهداف."
       },
-      "tags": ["Testing"]
+      "description": {
+        "en": "Parsing and validation live in a shared package instead of being copied per platform.",
+        "ar": "تعيش عمليات التحليل والتحقق في حزمة مشتركة بدل نسخها لكل منصة."
+      },
+      "tags": ["Testing"],
+      "media": {
+        "src": "/demo/feature-1.svg",
+        "alt": {
+          "en": "Abstract shared module connected to three platform surfaces.",
+          "ar": "وحدة مشتركة تجريدية متصلة بثلاث واجهات منصات."
+        },
+        "type": "image"
+      },
+      "evidence": null
     },
     {
       "title": { "en": "Measured performance", "ar": "أداء مقاس" },
-      "description": {
+      "oneLiner": {
         "en": "Budget checks keep the interface responsive.",
         "ar": "فحوص الميزانية تحافظ على استجابة الواجهة."
       },
-      "tags": ["Performance"]
+      "description": {
+        "en": "Frame timings are sampled in CI so regressions appear before release.",
+        "ar": "تُقاس أوقات الإطارات في التكامل المستمر لتظهر الانحدارات قبل الإصدار."
+      },
+      "tags": ["Performance"],
+      "media": {
+        "src": "/demo/feature-2.svg",
+        "alt": {
+          "en": "Abstract frame timeline with a highlighted budget line.",
+          "ar": "خط زمني تجريدي للإطارات مع إبراز خط الميزانية."
+        },
+        "type": "image"
+      },
+      "evidence": {
+        "en": "A frame-budget harness runs on every pull request.",
+        "ar": "يعمل اختبار ميزانية الإطارات على كل طلب دمج."
+      }
+    },
+    {
+      "title": { "en": "Predictable UX", "ar": "تجربة متوقعة" },
+      "oneLiner": {
+        "en": "The same patterns work on every screen size.",
+        "ar": "تعمل الأنماط نفسها على كل أحجام الشاشات."
+      },
+      "description": {
+        "en": "Shared tokens and keyboard behavior keep the experience consistent across platforms.",
+        "ar": "تحافظ الرموز المشتركة وسلوك لوحة المفاتيح على اتساق التجربة عبر المنصات."
+      },
+      "tags": ["UX", "Security"],
+      "media": {
+        "src": "/demo/feature-3.svg",
+        "alt": {
+          "en": "Abstract responsive layouts beside a secure connection badge.",
+          "ar": "تخطيطات متجاوبة تجريدية بجانب شارة اتصال آمن."
+        },
+        "type": "image"
+      },
+      "evidence": null
     }
   ],
   "metrics": null,
+  "sources": { "github": null, "mirror": null },
+  "deepDive": {
+    "architecture": {
+      "en": "A typed shared core is compiled for each target, with thin platform shells for input and rendering. The shells own no business rules.",
+      "ar": "تُجمّع نواة مشتركة ذات أنواع لكل هدف، مع أغلفة منصات رقيقة للإدخال والعرض. لا تملك الأغلفة أي قواعد عمل."
+    },
+    "code": null
+  },
   "repo": null,
   "store": null,
   "packageId": null,

@@ -75,6 +75,19 @@ const DEFAULT_EN_STRINGS = {
     repository: "Repository",
     store: "Store",
   },
+  projectDetail: {
+    backToProjects: "Back to projects",
+    overview: "Overview",
+    techStack: "Tech stack",
+    features: "Features",
+    deepDive: "Deep-dive",
+    lenses: "Lenses",
+    all: "All",
+    evidence: "Evidence",
+    noMedia: "No media",
+    github: "GitHub",
+    playStore: "Google Play",
+  },
   platforms: {
     web: "Web",
     android: "Android",
@@ -719,23 +732,88 @@ function demoProject(index) {
     tech: ["TypeScript", "Next.js"],
     features: [
       {
-        title: { en: "Fast by default", ar: "سريع افتراضيًا" },
+        title: { en: "Fast first paint", ar: "عرض أول سريع" },
+        oneLiner: {
+          en: "A server-rendered shell reaches the screen quickly.",
+          ar: "هيكل يُعرض من الخادم يصل إلى الشاشة بسرعة.",
+        },
         description: {
           en: "Server-rendered pages keep the first view quick.",
           ar: "صفحات تُعرض من الخادم تحافظ على سرعة العرض الأول.",
         },
         tags: ["Performance", "UX"],
+        media: {
+          src: "/demo/feature-1.svg",
+          alt: {
+            en: "Abstract dashboard with a fast-loading page skeleton.",
+            ar: "لوحة تجريدية تعرض هيكل صفحة سريعة التحميل.",
+          },
+          type: "image",
+        },
+        evidence: {
+          en: "Verified with a performance budget on every build.",
+          ar: "تم التحقق عبر ميزانية أداء في كل عملية بناء.",
+        },
       },
       {
         title: { en: "Accessible interactions", ar: "تفاعلات سهلة الوصول" },
+        oneLiner: {
+          en: "Every action is reachable without a pointer.",
+          ar: "يمكن الوصول إلى كل إجراء دون مؤشر.",
+        },
         description: {
           en: "Keyboard and screen-reader paths are part of the design.",
           ar: "مسارات لوحة المفاتيح وقارئات الشاشة جزء من التصميم.",
         },
         tags: ["UX", "Testing"],
+        media: {
+          src: "/demo/feature-2.svg",
+          alt: {
+            en: "Abstract interface with a highlighted keyboard focus ring.",
+            ar: "واجهة تجريدية مع إبراز حلقة تركيز لوحة المفاتيح.",
+          },
+          type: "image",
+        },
+        evidence: {
+          en: "Covered by automated keyboard checks.",
+          ar: "مغطى بفحوص آلية للوحة المفاتيح.",
+        },
+      },
+      {
+        title: { en: "Validated inputs", ar: "مدخلات مُتحقق منها" },
+        oneLiner: {
+          en: "One rule set guards the client and the server.",
+          ar: "مجموعة قواعد واحدة تحمي العميل والخادم.",
+        },
+        description: {
+          en: "Shared schemas reject malformed content before it reaches the page.",
+          ar: "مخططات مشتركة ترفض المحتوى غير الصالح قبل وصوله إلى الصفحة.",
+        },
+        tags: ["Security", "Testing"],
+        media: {
+          src: "/demo/feature-3.svg",
+          alt: {
+            en: "Abstract form with a validation check mark.",
+            ar: "نموذج تجريدي مع علامة تحقق.",
+          },
+          type: "image",
+        },
+        evidence: null,
       },
     ],
     metrics: null,
+    sources: { github: null, mirror: null },
+    deepDive: {
+      architecture: {
+        en: "A single app renders static project routes. Content is validated at build time so malformed entries fail early.",
+        ar: "تطبيق واحد يعرض مسارات المشاريع الثابتة. يُتحقق من المحتوى وقت البناء لتظهر الإدخالات غير الصالحة مبكرًا.",
+      },
+      code: {
+        language: "TypeScript",
+        snippet:
+          "export function assertSlug(value: string): string {\n  if (!/^[a-z0-9-]+$/.test(value)) {\n    throw new Error(`Invalid slug: ${value}`);\n  }\n  return value;\n}",
+      },
+    },
     repo: null,
     store: null,
     packageId: null,

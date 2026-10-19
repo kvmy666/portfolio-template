@@ -79,7 +79,7 @@ once; reduced motion shows the open state immediately.
 | --- | --- |
 | `cv` | Shows the CV request action |
 | `contact` | Shows the contact section and dock link |
-| `metrics` | Shows live metrics when project metrics exist |
+| `metrics` | Shows live metrics when a project has sources or fallback values |
 | `splash3d` | Shows the 3D hero card |
 | `laptop` | Shows the scroll-driven laptop visual |
 
@@ -102,12 +102,27 @@ sorted by `order`, then by slug. Duplicate slugs are rejected.
   "tech": ["TypeScript", "Next.js"],
   "features": [
     {
-      "title": { "en": "Fast by default" },
+      "title": { "en": "Fast first paint" },
+      "oneLiner": { "en": "A server-rendered shell reaches the screen quickly." },
       "description": { "en": "Why this matters." },
-      "tags": ["Performance", "UX"]
+      "tags": ["Performance", "UX"],
+      "media": {
+        "src": "/demo/feature-1.svg",
+        "alt": { "en": "Abstract dashboard with a fast-loading page skeleton." },
+        "type": "image"
+      },
+      "evidence": { "en": "Measured with a Lighthouse budget on every build." }
     }
   ],
   "metrics": null,
+  "sources": { "github": null, "mirror": null },
+  "deepDive": {
+    "architecture": { "en": "A server-rendered app with validated content." },
+    "code": {
+      "language": "TypeScript",
+      "snippet": "export const value = 1;"
+    }
+  },
   "repo": null,
   "store": null,
   "packageId": null,
@@ -118,15 +133,72 @@ sorted by `order`, then by slug. Duplicate slugs are rejected.
 Field notes:
 
 - `platform` is `web`, `android`, `ios`, or `cross-platform`.
-- `features[].tags` accepts `UX`, `Security`, `Testing`, and `Performance`.
-- `metrics` is either `null` or `{ "github": number | null, "mirror": number | null }`.
-- `repo`, `store`, and `packageId` are optional and nullable.
+- `features[]` each need `title`, `oneLiner`, `description`, and a non-empty,
+  unique `tags` list. Tags accept `UX`, `Security`, `Testing`, and
+  `Performance`.
+- `features[].media` is either `null` or
+  `{ "src": "/public/path", "alt": localized string, "type": "image" | "video" }`.
+- `features[].evidence` is `null` or a localized string describing what was
+  checked and how.
+- `metrics` is either `null` or a static fallback:
+  `{ "github": number | null, "mirror": number | null }`. Here `github` is the
+  fallback star count and `mirror` is the fallback download count. Live values
+  replace them after the page mounts; when a request fails the fallback stays
+  visible.
+- `sources` holds optional repository identifiers as full `owner/repo` slugs:
+  `{ "github": "owner/repo" | null, "mirror": "owner/repo" | null }`. `github`
+  supplies stars and its release downloads. `mirror` supplies additional release
+  downloads. Both are combined for the downloads metric.
+
+### Live metrics
+
+When the `metrics` feature flag is on and a project has at least one source,
+the card and detail header show live downloads and GitHub stars. Downloads sum
+`assets[].download_count` across releases from both `sources.github` and
+`sources.mirror`; stars come from the GitHub repository. A successful response
+is cached in `sessionStorage` under a `metrics:<slug>` key that also includes
+both source slugs, for one hour. Changing either source therefore invalidates
+the cached value. Network
+failures, rate limits, and malformed responses are silent: the static `metrics`
+fallback remains on screen. The template intentionally does not show Google
+Play install counts or review status.
+- `deepDive.architecture` is `null` or a localized string.
+- `deepDive.code` is `null` or `{ "language": string, "snippet": string }`.
+  When both deep-dive fields are null the section is omitted.
+- `repo`, `store`, and `packageId` are optional and nullable. A `packageId`
+  without a `store` URL links to Google Play.
 - `logo` is a public path that starts with `/`.
 - `demo: true` marks a generated placeholder. The setup wizard manages these.
   Real projects should use `demo: false`.
 
+### Project detail page
+
+Every project slug becomes a static `/projects/<slug>` page. The page keeps the
+locked block order: header, overview, tech stack, features, and deep-dive.
+Feature lenses (`All`, `UX`, `Security`, `Testing`, `Performance`) filter the
+feature cards in place. Counts come from the current project. Opening
+`/projects/<slug>#security` selects the Security lens, and clicking a lens
+updates the URL hash with `history.replaceState` so the page does not navigate.
+
+### Feature media rules
+
+- Use one image or short video per feature; `media` may be `null`.
+- Keep videos at six seconds or shorter, muted, looping, and `playsInline`.
+  Prefer WebM; animated GIF is acceptable as a fallback.
+- Keep images at or below 1.5 MB and videos at or below 2.5 MB.
+- Media renders inside a fixed `16/10` box, so provide artwork at that aspect
+  ratio to avoid cropping surprises. All media paths must start with `/`.
+- Write `alt` for the meaning of the media, not just its appearance.
+
+### Deep-dive
+
+Use `deepDive` for architecture notes and a short, representative code sample.
+The UI shows the `language` label above a `<pre><code>` block. Do not add
+retrospectives, CTAs, publication status, or review status to project content;
+the template intentionally omits those blocks.
+
 An empty `content/projects/` folder is valid. The home page renders the
-localized empty state instead of a grid.
+localized empty state instead of a grid, and no project routes are generated.
 
 ## UI strings
 
@@ -136,6 +208,7 @@ dictionary. Every dictionary contains:
 - `nav.home`, `nav.about`, `nav.projects`, `nav.contact`
 - `hero.aboutMe`
 - `projects.empty`
+- `projectDetail.*` (detail headings, lenses, and evidence labels)
 - `contact.submit`
 - `footer.rights`
 - optional `_meta` and `_todo` notes
@@ -145,9 +218,10 @@ When the wizard adds a language, it copies the English dictionary and adds a
 
 ## Demo assets
 
-`public/demo/logo-*.svg` and `src/app/icon.svg` are generated artwork released
-under CC0. Replace them with your own assets, or keep the generated shapes.
-Update the `logo` path in each project if you change the filenames.
+`public/demo/logo-*.svg`, `public/demo/feature-*.svg`, and
+`src/app/icon.svg` are generated artwork released under CC0. Replace them with
+your own assets, or keep the generated shapes. Update the `logo` and `media.src`
+paths in each project if you change the filenames.
 
 ## Privacy
 

@@ -43,7 +43,40 @@ function validSite(): SiteFixture {
   return structuredClone(siteJson) as SiteFixture;
 }
 
-function validProject() {
+type ProjectFixture = {
+  slug: string;
+  demo: boolean;
+  name: Record<string, string>;
+  summary: Record<string, string>;
+  description: Record<string, string>;
+  order: number;
+  platform: "web" | "android" | "ios" | "cross-platform";
+  tech: string[];
+  features: {
+    title: Record<string, string>;
+    oneLiner: Record<string, string>;
+    description: Record<string, string>;
+    tags: ("UX" | "Security" | "Testing" | "Performance")[];
+    media: {
+      src: string;
+      alt: Record<string, string>;
+      type: "image" | "video";
+    } | null;
+    evidence: Record<string, string> | null;
+  }[];
+  metrics: { github: number | null; mirror: number | null } | null;
+  sources: { github: string | null; mirror: string | null };
+  deepDive: {
+    architecture: Record<string, string> | null;
+    code: { language: string; snippet: string } | null;
+  };
+  repo: string | null;
+  store: string | null;
+  packageId: string | null;
+  logo: string;
+};
+
+function validProject(): ProjectFixture {
   return {
     slug: "demo-project-fixture",
     demo: true,
@@ -56,11 +89,26 @@ function validProject() {
     features: [
       {
         title: { en: "Fast by default" },
+        oneLiner: { en: "Instant first paint" },
         description: { en: "A short feature description." },
         tags: ["Performance" as const],
+        media: {
+          src: "/demo/feature-1.svg",
+          alt: { en: "Abstract performance dashboard" },
+          type: "image" as const,
+        },
+        evidence: { en: "Measured with Lighthouse." },
       },
     ],
     metrics: null,
+    sources: { github: null, mirror: null },
+    deepDive: {
+      architecture: { en: "A small server-rendered app." },
+      code: {
+        language: "TypeScript",
+        snippet: "export const value = 1;",
+      },
+    },
     repo: null,
     store: null,
     packageId: null,
@@ -251,6 +299,77 @@ describe("ProjectsSchema", () => {
     const result = ProjectSchema.safeParse(validProject());
 
     expect(result.success).toBe(true);
+  });
+
+  it("accepts nullable media, evidence, and deep-dive", () => {
+    const fixture = validProject();
+    fixture.features[0].media = null;
+    fixture.features[0].evidence = null;
+    fixture.deepDive.architecture = null;
+    fixture.deepDive.code = null;
+
+    expect(ProjectSchema.safeParse(fixture).success).toBe(true);
+  });
+
+  it("requires one-liners in the default locale", () => {
+    const fixture = validProject();
+    delete fixture.features[0].oneLiner.en;
+
+    const result = ProjectSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["features", 0, "oneLiner", "en"],
+            message: expect.stringContaining("default locale"),
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("requires media alt text in the default locale", () => {
+    const fixture = validProject();
+    if (!fixture.features[0].media) {
+      throw new Error("Fixture media should exist");
+    }
+    delete fixture.features[0].media.alt.en;
+
+    const result = ProjectSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["features", 0, "media", "alt", "en"],
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("rejects a relative media path", () => {
+    const fixture = validProject();
+    if (!fixture.features[0].media) {
+      throw new Error("Fixture media should exist");
+    }
+    fixture.features[0].media.src = "demo/feature-1.svg";
+
+    const result = ProjectSchema.safeParse(fixture);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["features", 0, "media", "src"],
+          }),
+        ]),
+      );
+    }
   });
 
   it("rejects duplicate project slugs", () => {
