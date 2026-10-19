@@ -12,7 +12,7 @@ const display = localFont({
   ],
   variable: "--font-display",
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const body = localFont({
@@ -21,7 +21,7 @@ const body = localFont({
   ],
   variable: "--font-body",
   display: "swap",
-  preload: false,
+  preload: true,
 });
 
 const arabic = localFont({
@@ -114,6 +114,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${display.variable} ${body.variable} ${arabic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <link
+          rel="preload"
+          as="image"
+          href={siteConfig.hero.photo ?? "/demo/avatar.svg"}
+          fetchPriority="high"
+        />
         <script dangerouslySetInnerHTML={{ __html: initScript }} />
         <script
           type="application/ld+json"

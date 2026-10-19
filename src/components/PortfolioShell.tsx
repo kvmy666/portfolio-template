@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import type {
   LocaleStrings,
@@ -12,13 +12,109 @@ import type {
   SiteConfig,
 } from "@/content/schema";
 import { AppFrame } from "./AppFrame";
-import { ContactForm } from "./ContactForm";
-import { CVModal } from "./CVModal";
-import { LaptopScrub } from "./LaptopScrub";
 import { useLocale } from "./LocaleProvider";
 import { ProjectMetrics } from "./ProjectMetrics";
 
 const HeroSplash = dynamic(() => import("./HeroSplash"), { ssr: false });
+
+const ContactForm = dynamic(
+  () => import("./ContactForm").then((module) => module.ContactForm),
+  { ssr: false, loading: () => <ContactFormSkeleton /> },
+);
+
+const LaptopScrub = dynamic(
+  () => import("./LaptopScrub").then((module) => module.LaptopScrub),
+  { ssr: false, loading: () => <LaptopScrubSkeleton /> },
+);
+
+const CVModal = dynamic(
+  () => import("./CVModal").then((module) => module.CVModal),
+  { ssr: false },
+);
+
+function ContactFormSkeleton() {
+  return (
+    <div className="mt-8 space-y-5" aria-hidden="true" data-contact-skeleton>
+      <div className="grid gap-5 sm:grid-cols-2">
+        {[0, 1].map((column) => (
+          <div key={column} className="space-y-2">
+            <div className="h-4 w-24 rounded bg-line/60" />
+            <div className="h-[46px] rounded-lg border border-line bg-background" />
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2">
+        <div className="h-4 w-28 rounded bg-line/60" />
+        <div className="h-[46px] rounded-lg border border-line bg-background" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-4 w-24 rounded bg-line/60" />
+        <div className="h-[132px] rounded-lg border border-line bg-background" />
+      </div>
+      <div className="h-11 w-36 rounded-full bg-line/60" />
+    </div>
+  );
+}
+
+function LaptopScrubSkeleton() {
+  return (
+    <div className="laptop-scrub" aria-hidden="true" data-laptop-skeleton>
+      <div className="laptop-scrub-glow" />
+      <div className="laptop-frame-stage animate-pulse" />
+    </div>
+  );
+}
+
+function LazyOnView({
+  children,
+  placeholder,
+  rootMargin = "600px",
+}: {
+  children: ReactNode;
+  placeholder: ReactNode;
+  rootMargin?: string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      return;
+    }
+
+    const element = containerRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      const timer = window.setTimeout(() => setVisible(true), 0);
+
+      return () => window.clearTimeout(timer);
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin },
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [rootMargin, visible]);
+
+  return (
+    <div ref={containerRef}>
+      {visible ? children : placeholder}
+    </div>
+  );
+}
 
 function GithubMark() {
   return (
@@ -69,6 +165,22 @@ function PortfolioContent({
 }: Omit<PortfolioShellProps, "dictionaries">) {
   const { t, locale } = useLocale();
   const aboutSectionRef = useRef<HTMLElement>(null);
+  const cvTriggerRef = useRef<HTMLButtonElement>(null);
+  const [cvOpen, setCvOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 751px)");
+    const update = () => setShowSplash(query.matches);
+    const timer = window.setTimeout(update, 0);
+
+    query.addEventListener("change", update);
+
+    return () => {
+      window.clearTimeout(timer);
+      query.removeEventListener("change", update);
+    };
+  }, []);
   const features = site.features;
   const role = localized(site.role, locale, site.defaultLocale);
   const pitch = localized(site.pitch, locale, site.defaultLocale);
@@ -181,12 +293,17 @@ function PortfolioContent({
             <div className="hero-panel" data-hero-panel aria-hidden="true">
               <div className="hero-panel-inner">
                 <div className="hero-splash-poster" />
-                {features.splash3d ? <HeroSplash /> : null}
-                <div
+                {features.splash3d && showSplash ? <HeroSplash /> : null}
+                {/* eslint-disable-next-line @next/next/no-img-element -- CSS background LCP replaced with an eager, explicitly sized image. */}
+                <img
+                  src={heroPhoto}
+                  alt=""
+                  width={480}
+                  height={640}
+                  decoding="async"
+                  fetchPriority="high"
+                  data-hero-photo
                   className="hero-photo"
-                  style={{
-                    backgroundImage: `url(${JSON.stringify(heroPhoto)})`,
-                  }}
                 />
                 <div className="hero-photo-fade" />
                 {showDemoPhotoCaption ? (
@@ -233,12 +350,14 @@ function PortfolioContent({
               </div>
 
               {features.laptop ? (
-                <LaptopScrub
-                  frames={site.hero.laptopFrames}
-                  intro={aboutIntro}
-                  mark={t.visual.portfolio}
-                  pinTarget={aboutSectionRef}
-                />
+                <LazyOnView placeholder={<LaptopScrubSkeleton />}>
+                  <LaptopScrub
+                    frames={site.hero.laptopFrames}
+                    intro={aboutIntro}
+                    mark={t.visual.portfolio}
+                    pinTarget={aboutSectionRef}
+                  />
+                </LazyOnView>
               ) : null}
             </div>
           </div>
@@ -299,6 +418,7 @@ function PortfolioContent({
                 return (
                   <article key={project.slug} className="h-full">
                     <Link
+                      prefetch={false}
                       href={`/projects/${project.slug}`}
                       data-testid="showcase-card"
                       className="group flex h-full flex-col rounded-lg border border-line bg-card p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl"
@@ -391,7 +511,31 @@ function PortfolioContent({
             <div className="rounded-xl border border-line bg-card p-8 shadow-sm sm:p-12">
               <h2>{t.cv.title}</h2>
               <p className="measure mt-4 text-muted">{t.cv.body}</p>
-              <CVModal file={cvFile} />
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <button
+                  ref={cvTriggerRef}
+                  type="button"
+                  onClick={() => setCvOpen(true)}
+                  aria-haspopup="dialog"
+                  className="inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast shadow-lg shadow-accent/20 transition hover:-translate-y-0.5"
+                >
+                  {t.cv.view}
+                </button>
+                <a
+                  href={cvFile}
+                  download
+                  className="inline-flex items-center rounded-full border border-line bg-background px-5 py-3 text-sm font-semibold transition hover:border-accent/40 hover:text-primary-text"
+                >
+                  {t.cv.download}
+                </a>
+              </div>
+              {cvOpen ? (
+                <CVModal
+                  file={cvFile}
+                  triggerRef={cvTriggerRef}
+                  onClose={() => setCvOpen(false)}
+                />
+              ) : null}
             </div>
           </section>
         ) : null}
@@ -410,7 +554,9 @@ function PortfolioContent({
                 <h2 className="mt-3">{t.contact.title}</h2>
                 <p className="measure mt-4 text-muted">{pitch}</p>
                 <div className="max-w-2xl">
-                  <ContactForm key={locale} labels={contactLabels} />
+                  <LazyOnView placeholder={<ContactFormSkeleton />}>
+                    <ContactForm key={locale} labels={contactLabels} />
+                  </LazyOnView>
                 </div>
                 <p className="mt-6 text-sm text-muted">
                   <a

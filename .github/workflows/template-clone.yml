@@ -1,0 +1,23 @@
+name: Template clone
+on: [pull_request]
+jobs:
+  clone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Clone the PR commit into a clean directory
+        run: |
+          git clone https://github.com/${{ github.repository }}.git /tmp/portfolio
+          cd /tmp/portfolio
+          git fetch origin ${{ github.event.pull_request.head.sha }}
+          git checkout ${{ github.event.pull_request.head.sha }}
+      - name: Install, set up, build
+        working-directory: /tmp/portfolio
+        run: |
+          npm ci
+          node scripts/setup.mjs --yes --projects=3 --langs=en,ar
+          npm run build
