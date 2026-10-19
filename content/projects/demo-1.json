@@ -84,8 +84,8 @@
       "evidence": null
     }
   ],
-  "metrics": null,
-  "sources": { "github": null, "mirror": null },
+  "metrics": { "github": 7, "mirror": 11 },
+  "sources": { "github": "example/demo-project-one", "mirror": "example/demo-project-one-mirror" },
   "deepDive": {
     "architecture": {
       "en": "A single Next.js app renders static project routes. Content is validated at build time, so a malformed entry fails the build instead of reaching a visitor.",

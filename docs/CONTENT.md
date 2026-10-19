@@ -79,7 +79,7 @@ once; reduced motion shows the open state immediately.
 | --- | --- |
 | `cv` | Shows the CV request action |
 | `contact` | Shows the contact section and dock link |
-| `metrics` | Shows live metrics when project metrics exist |
+| `metrics` | Shows live metrics when a project has sources or fallback values |
 | `splash3d` | Shows the 3D hero card |
 | `laptop` | Shows the scroll-driven laptop visual |
 
@@ -140,10 +140,28 @@ Field notes:
   `{ "src": "/public/path", "alt": localized string, "type": "image" | "video" }`.
 - `features[].evidence` is `null` or a localized string describing what was
   checked and how.
-- `metrics` is either `null` or `{ "github": number | null, "mirror": number | null }`.
-  Metrics are static placeholders in this phase; live metrics arrive later.
-- `sources` holds optional repository identifiers, not full URLs:
-  `{ "github": "owner/repo" | null, "mirror": "owner/repo" | null }`.
+- `metrics` is either `null` or a static fallback:
+  `{ "github": number | null, "mirror": number | null }`. Here `github` is the
+  fallback star count and `mirror` is the fallback download count. Live values
+  replace them after the page mounts; when a request fails the fallback stays
+  visible.
+- `sources` holds optional repository identifiers as full `owner/repo` slugs:
+  `{ "github": "owner/repo" | null, "mirror": "owner/repo" | null }`. `github`
+  supplies stars and its release downloads. `mirror` supplies additional release
+  downloads. Both are combined for the downloads metric.
+
+### Live metrics
+
+When the `metrics` feature flag is on and a project has at least one source,
+the card and detail header show live downloads and GitHub stars. Downloads sum
+`assets[].download_count` across releases from both `sources.github` and
+`sources.mirror`; stars come from the GitHub repository. A successful response
+is cached in `sessionStorage` under a `metrics:<slug>` key that also includes
+both source slugs, for one hour. Changing either source therefore invalidates
+the cached value. Network
+failures, rate limits, and malformed responses are silent: the static `metrics`
+fallback remains on screen. The template intentionally does not show Google
+Play install counts or review status.
 - `deepDive.architecture` is `null` or a localized string.
 - `deepDive.code` is `null` or `{ "language": string, "snippet": string }`.
   When both deep-dive fields are null the section is omitted.

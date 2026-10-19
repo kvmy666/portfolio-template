@@ -196,9 +196,17 @@ const ProjectMetricsSchema = z.strictObject({
   mirror: z.number().int().nonnegative().nullable(),
 });
 
+const repositorySlugSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/,
+    "Repository sources must be full owner/repo slugs",
+  );
+
 export const ProjectSourcesSchema = z.strictObject({
-  github: z.string().trim().min(1).nullable(),
-  mirror: z.string().trim().min(1).nullable(),
+  github: repositorySlugSchema.nullable(),
+  mirror: repositorySlugSchema.nullable(),
 });
 
 export const ProjectCodeSchema = z.strictObject({
@@ -383,6 +391,10 @@ export const LocaleStringsSchema = z.strictObject({
     title: z.string().min(1),
     github: z.string().min(1),
     mirror: z.string().min(1),
+    downloads: z.string().min(1),
+    stars: z.string().min(1),
+    downloadsSource: z.string().min(1),
+    starsSource: z.string().min(1),
   }),
   cv: z.strictObject({
     title: z.string().min(1),

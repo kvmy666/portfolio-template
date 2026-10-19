@@ -50,7 +50,11 @@
   "metrics": {
     "title": "مؤشرات مباشرة",
     "github": "نجوم GitHub",
-    "mirror": "تنزيلات المرآة"
+    "mirror": "تنزيلات المرآة",
+    "downloads": "التنزيلات",
+    "stars": "النجوم",
+    "downloadsSource": "إجمالي التنزيلات من إصدارات GitHub والمرآة.",
+    "starsSource": "عدد النجوم على مستودع GitHub الرئيسي."
   },
   "cv": {
     "title": "السيرة الذاتية",

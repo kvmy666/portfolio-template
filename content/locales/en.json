@@ -50,7 +50,11 @@
   "metrics": {
     "title": "Live metrics",
     "github": "GitHub stars",
-    "mirror": "Mirror downloads"
+    "mirror": "Mirror downloads",
+    "downloads": "Downloads",
+    "stars": "Stars",
+    "downloadsSource": "Combined download count from GitHub and mirror releases.",
+    "starsSource": "GitHub stargazers for the main repository."
   },
   "cv": {
     "title": "Curriculum Vitae",

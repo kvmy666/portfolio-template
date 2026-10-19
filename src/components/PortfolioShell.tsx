@@ -14,6 +14,7 @@ import type {
 import { AppFrame } from "./AppFrame";
 import { LaptopScrub } from "./LaptopScrub";
 import { useLocale } from "./LocaleProvider";
+import { ProjectMetrics } from "./ProjectMetrics";
 
 const HeroSplash = dynamic(() => import("./HeroSplash"), { ssr: false });
 
@@ -351,6 +352,23 @@ function PortfolioContent({
                         {localized(project.summary, locale, site.defaultLocale)}
                       </p>
 
+                      {features.metrics ? (
+                        <ProjectMetrics
+                          slug={project.slug}
+                          sources={project.sources}
+                          fallback={
+                            project.metrics
+                              ? {
+                                  downloads: project.metrics.mirror,
+                                  stars: project.metrics.github,
+                                }
+                              : null
+                          }
+                          locale={locale}
+                          variant="card"
+                        />
+                      ) : null}
+
                       <ul className="mt-5 flex flex-wrap gap-1.5">
                         {project.tech.map((technology) => (
                           <li
@@ -361,35 +379,6 @@ function PortfolioContent({
                           </li>
                         ))}
                       </ul>
-
-                      {project.metrics ? (
-                        <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5 text-sm">
-                          <div>
-                            <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted">
-                              {t.metrics.github}
-                            </dt>
-                            <dd className="mt-1 font-semibold">
-                              {project.metrics.github === null
-                                ? "—"
-                                : project.metrics.github.toLocaleString(
-                                    locale,
-                                  )}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted">
-                              {t.metrics.mirror}
-                            </dt>
-                            <dd className="mt-1 font-semibold">
-                              {project.metrics.mirror === null
-                                ? "—"
-                                : project.metrics.mirror.toLocaleString(
-                                    locale,
-                                  )}
-                            </dd>
-                          </div>
-                        </dl>
-                      ) : null}
                     </Link>
                   </article>
                 );

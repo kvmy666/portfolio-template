@@ -16,6 +16,7 @@ import type {
 } from "@/content/schema";
 import { AppFrame } from "./AppFrame";
 import { useLocale } from "./LocaleProvider";
+import { ProjectMetrics } from "./ProjectMetrics";
 
 const lenses: FeatureTag[] = ["UX", "Security", "Testing", "Performance"];
 
@@ -147,7 +148,7 @@ function ProjectContent({
             unoptimized
             className="h-20 w-20 shrink-0 rounded-lg border border-line bg-background object-contain"
           />
-          <div>
+          <div className="min-w-0">
             <h1>{localized(project.name, locale, site.defaultLocale)}</h1>
             <p className="measure mt-4 text-muted">
               {localized(project.summary, locale, site.defaultLocale)}
@@ -194,6 +195,23 @@ function ProjectContent({
               </a>
             ) : null}
           </div>
+        ) : null}
+
+        {site.features.metrics ? (
+          <ProjectMetrics
+            slug={project.slug}
+            sources={project.sources}
+            fallback={
+              project.metrics
+                ? {
+                    downloads: project.metrics.mirror,
+                    stars: project.metrics.github,
+                  }
+                : null
+            }
+            locale={locale}
+            variant="detail"
+          />
         ) : null}
       </header>
 
@@ -327,15 +345,19 @@ function ProjectContent({
           ) : null}
 
           {project.deepDive.code ? (
-            <div className="mt-6 overflow-hidden rounded-lg border border-line bg-card">
+            <div className="mt-6 min-w-0 max-w-full overflow-hidden rounded-lg border border-line bg-card">
               <div className="border-b border-line px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
                 {project.deepDive.code.language}
               </div>
               <pre
                 dir="ltr"
-                className="overflow-x-auto p-4 text-start text-sm leading-6"
+                tabIndex={0}
+                aria-label={`${t.projectDetail.deepDive}: ${project.deepDive.code.language}`}
+                className="max-w-full overflow-x-auto p-4 text-start text-sm leading-6"
               >
-                <code>{project.deepDive.code.snippet}</code>
+                <code className="whitespace-pre">
+                  {project.deepDive.code.snippet}
+                </code>
               </pre>
             </div>
           ) : null}

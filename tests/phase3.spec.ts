@@ -1,5 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+
+import { expect, test } from "./fixtures";
+
+const githubHeaders = {
+  "access-control-allow-origin": "*",
+  "content-type": "application/json",
+};
 
 test("project detail route renders in the locked block order", { tag: "@phase3" }, async ({
   page,
@@ -126,6 +132,118 @@ test("unknown project slugs return 404", { tag: "@phase3" }, async ({ page }) =>
   });
 
   expect(response?.status()).toBe(404);
+});
+
+test("metrics render live downloads from github and mirror plus stars", { tag: "@phase3" }, async ({
+  page,
+}) => {
+  await page.route("**/api.github.com/**", async (route) => {
+    const { pathname } = new URL(route.request().url());
+
+    if (pathname.endsWith("/releases")) {
+      const mirror = pathname.includes("demo-project-one-mirror");
+      const releases = mirror
+        ? [{ assets: [{ download_count: 50 }] }]
+        : [
+            {
+              assets: [{ download_count: 100 }, { download_count: 23 }],
+            },
+          ];
+
+      await route.fulfill({
+        status: 200,
+        headers: githubHeaders,
+        body: JSON.stringify(releases),
+      });
+      return;
+    }
+
+    if (pathname.endsWith("/repos/example/demo-project-one")) {
+      await route.fulfill({
+        status: 200,
+        headers: githubHeaders,
+        body: JSON.stringify({ stargazers_count: 42 }),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 404,
+      headers: githubHeaders,
+      body: JSON.stringify({ message: "Not Found" }),
+    });
+  });
+
+  await page.goto("/projects/demo-project-one", { waitUntil: "networkidle" });
+
+  const metrics = page.getByTestId("project-metrics").first();
+  await expect(metrics).toBeVisible();
+  await expect(metrics.getByTestId("metric-downloads")).toHaveText("173");
+  await expect(metrics.getByTestId("metric-stars")).toHaveText("42");
+});
+
+test("metrics failure keeps the static fallback without console errors", { tag: "@phase3" }, async ({
+  page,
+}) => {
+  const pageErrors: string[] = [];
+  const consoleErrors: string[] = [];
+
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+  });
+
+  await page.route("**/api.github.com/**", (route) => route.abort());
+
+  await page.goto("/projects/demo-project-one", { waitUntil: "networkidle" });
+
+  const metrics = page.getByTestId("project-metrics").first();
+  await expect(metrics.getByTestId("metric-downloads")).toHaveText("11");
+  await expect(metrics.getByTestId("metric-stars")).toHaveText("7");
+
+  await page.waitForTimeout(500);
+
+  await expect(metrics.getByTestId("metric-downloads")).toHaveText("11");
+  await expect(metrics.getByTestId("metric-stars")).toHaveText("7");
+  expect(pageErrors).toEqual([]);
+  expect(consoleErrors.filter((text) => /unhandled/i.test(text))).toEqual([]);
+});
+
+test("project page has no horizontal overflow and code scrolls at 390px", { tag: "@phase3" }, async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/projects/demo-project-one", { waitUntil: "networkidle" });
+
+  const pre = page.locator('pre[dir="ltr"]');
+  await expect(pre).toBeVisible();
+  await pre.scrollIntoViewIfNeeded();
+
+  const scrollable = await pre.evaluate(
+    (element) => element.scrollWidth > element.clientWidth,
+  );
+  expect(scrollable).toBe(true);
+
+  const scrollLeft = await pre.evaluate((element) => {
+    element.scrollLeft = 120;
+    return element.scrollLeft;
+  });
+  expect(scrollLeft).toBeGreaterThan(0);
+
+  const dimensions = await page.evaluate(() => ({
+    documentWidth: document.documentElement.scrollWidth,
+    bodyWidth: document.body.scrollWidth,
+    viewportWidth: window.innerWidth,
+  }));
+
+  expect(dimensions.documentWidth).toBeLessThanOrEqual(
+    dimensions.viewportWidth + 1,
+  );
+  expect(dimensions.bodyWidth).toBeLessThanOrEqual(
+    dimensions.viewportWidth + 1,
+  );
 });
 
 test("project page has no critical or serious axe violations", { tag: "@a11y" }, async ({

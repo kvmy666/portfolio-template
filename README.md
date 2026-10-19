@@ -104,9 +104,20 @@ Set any flag to `false` to remove that part of the page:
 | --- | --- |
 | `cv` | CV request action |
 | `contact` | Contact section and dock link |
-| `metrics` | Metrics panel, when project metrics exist |
+| `metrics` | Live downloads and GitHub stars, with static fallbacks |
 | `splash3d` | 3D hero card |
 | `laptop` | Scroll-driven laptop visual |
+
+### Live metrics
+
+With `metrics` enabled, project cards and detail headers show downloads and
+GitHub stars. Downloads combine `assets[].download_count` from releases in both
+`sources.github` and `sources.mirror`; stars come from the GitHub repository.
+The static `metrics` values render immediately, then live values replace them
+after mount. Successful responses are cached in `sessionStorage` under a
+`metrics:<slug>` key that includes both source slugs for one hour. Failed or
+malformed requests are silent and leave the fallback in place. Google Play
+install counts and review status are intentionally not shown.
 
 ### Laptop visual and frames
 
@@ -204,9 +215,12 @@ Rules and conventions:
   2.5 MB. Keep images at or below 1.5 MB. Prefer WebM over GIF.
 - `features[].evidence` is `null` or a localized note about what was checked and
   how.
-- `metrics` is `null` or `{ "github": number | null, "mirror": number | null }`.
-  These are static fallbacks until live metrics land.
-- `sources` holds optional repository slugs: `{ "github": null, "mirror": null }`.
+- `metrics` is `null` or a static fallback
+  `{ "github": number | null, "mirror": number | null }`, where `github` is the
+  fallback stars and `mirror` is the fallback downloads.
+- `sources` holds optional full `owner/repo` slugs:
+  `{ "github": "owner/repo" | null, "mirror": "owner/repo" | null }`. Stars come
+  from `github`; downloads sum releases from both sources.
 - `deepDive` holds optional architecture copy and a short code sample:
   `{ "architecture": localized | null, "code": { "language", "snippet" } | null }`.
 - Set `demo: false` for real work. The wizard never overwrites real projects
