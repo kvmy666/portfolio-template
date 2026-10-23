@@ -1,18 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const MOBILE_QUERY = "(max-width: 750px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-const SMOOTHING = 10;
 const MAX_DEVICE_PIXEL_RATIO = 2;
+const OPEN_END = 0.4;
+const CLOSE_START = 0.6;
+
+function laptopScrollProgress(progress: number): number {
+  if (progress <= OPEN_END) {
+    return progress / OPEN_END;
+  }
+
+  if (progress <= CLOSE_START) {
+    return 1;
+  }
+
+  return Math.max(0, (1 - progress) / (1 - CLOSE_START));
+}
 
 type LaptopScrubProps = {
   frames: string[] | null;
   mobileFrames?: string[] | null;
   intro: string;
   mark: string;
-  pinTarget: RefObject<HTMLElement | null>;
 };
 
 type FrameImage = {
@@ -49,7 +61,6 @@ export function LaptopScrub({
   mobileFrames = null,
   intro,
   mark,
-  pinTarget,
 }: LaptopScrubProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -75,18 +86,12 @@ export function LaptopScrub({
     }
 
     const canvas = frameList ? canvasRef.current : null;
-    const pinElement = pinTarget.current ?? root;
     const reduceQuery = window.matchMedia(REDUCED_MOTION_QUERY);
     const images: FrameImage[] = [];
     let reduced = reduceQuery.matches;
-    let visible = typeof IntersectionObserver === "undefined";
     let disposed = false;
-    let rafId = 0;
-    let running = false;
-    let lastFrameTime = 0;
+    let scrollRaf = 0;
     let currentProgress = reduced ? 1 : 0;
-    let targetProgress = currentProgress;
-    let gsapContext: { revert: () => void } | null = null;
 
     const context = canvas?.getContext("2d") ?? null;
 
@@ -151,79 +156,36 @@ export function LaptopScrub({
       applyProgress(currentProgress);
     };
 
-    const stopLoop = () => {
-      running = false;
-      lastFrameTime = 0;
+    const updateFromScroll = () => {
+      scrollRaf = 0;
 
-      if (rafId) {
-        window.cancelAnimationFrame(rafId);
-        rafId = 0;
+      if (disposed || reduced) {
+        return;
       }
+
+      const rect = root.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || 1;
+      const raw = Math.max(
+        0,
+        Math.min(1, (viewportHeight * 0.8 - rect.top) / (viewportHeight * 0.75)),
+      );
+
+      applyProgress(laptopScrollProgress(raw));
     };
 
-    const tick = (now: number) => {
-      if (
-        disposed ||
-        reduced ||
-        !visible ||
-        document.visibilityState === "hidden"
-      ) {
-        stopLoop();
-        return;
+    const requestUpdate = () => {
+      if (!scrollRaf) {
+        scrollRaf = window.requestAnimationFrame(updateFromScroll);
       }
-
-      const delta = lastFrameTime
-        ? Math.min(0.05, (now - lastFrameTime) / 1000)
-        : 1 / 60;
-      lastFrameTime = now;
-
-      const difference = targetProgress - currentProgress;
-      currentProgress += difference * (1 - Math.exp(-SMOOTHING * delta));
-      applyProgress(currentProgress);
-
-      if (Math.abs(targetProgress - currentProgress) < 0.0008) {
-        applyProgress(targetProgress);
-        stopLoop();
-        return;
-      }
-
-      rafId = window.requestAnimationFrame(tick);
-    };
-
-    const startLoop = () => {
-      if (
-        running ||
-        disposed ||
-        reduced ||
-        !visible ||
-        document.visibilityState === "hidden"
-      ) {
-        return;
-      }
-
-      running = true;
-      lastFrameTime = 0;
-      rafId = window.requestAnimationFrame(tick);
-    };
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        stopLoop();
-        return;
-      }
-
-      startLoop();
     };
 
     const onReducedMotionChange = (event: MediaQueryListEvent) => {
       reduced = event.matches;
 
       if (reduced) {
-        stopLoop();
-        targetProgress = 1;
         applyProgress(1);
       } else {
-        startLoop();
+        requestUpdate();
       }
     };
 
@@ -241,11 +203,12 @@ export function LaptopScrub({
       delete root.dataset.laptopFrame;
     }
 
+    root.dataset.laptopGsap = "native";
+    root.dataset.laptopPinned = "false";
+
     if (reduced) {
-      root.dataset.laptopPinned = "false";
       applyProgress(1);
     } else {
-      root.dataset.laptopPinned = "true";
       applyProgress(0);
     }
 
@@ -280,82 +243,30 @@ export function LaptopScrub({
     resizeObserver?.observe(canvas?.parentElement ?? root);
     sizeCanvas();
 
-    const intersectionObserver =
-      typeof IntersectionObserver === "undefined"
-        ? null
-        : new IntersectionObserver(
-            (entries) => {
-              visible = entries[0]?.isIntersecting ?? true;
-
-              if (!visible) {
-                stopLoop();
-              } else if (reduced) {
-                applyProgress(1);
-              } else {
-                startLoop();
-              }
-            },
-            { threshold: 0 },
-          );
-
-    intersectionObserver?.observe(root);
-    document.addEventListener("visibilitychange", onVisibilityChange);
     reduceQuery.addEventListener("change", onReducedMotionChange);
-
-    if (!reduced) {
-      void (async () => {
-        try {
-          const [{ gsap }, { ScrollTrigger }] = await Promise.all([
-            import("gsap"),
-            import("gsap/ScrollTrigger"),
-          ]);
-
-          if (disposed) {
-            return;
-          }
-
-          gsap.registerPlugin(ScrollTrigger);
-
-          gsapContext = gsap.context(() => {
-            ScrollTrigger.create({
-              trigger: pinElement,
-              start: "top top",
-              end: "+=120%",
-              pin: pinElement,
-              pinSpacing: true,
-              scrub: true,
-              invalidateOnRefresh: true,
-              onRefresh: (self) => {
-                targetProgress = self.progress;
-                applyProgress(self.progress);
-              },
-              onUpdate: (self) => {
-                targetProgress = self.progress;
-                startLoop();
-              },
-            });
-          }, pinElement);
-
-          root.dataset.laptopPinned = "true";
-          root.dataset.laptopGsap = "true";
-        } catch {
-          root.dataset.laptopGsap = "failed";
-          targetProgress = 1;
-          applyProgress(1);
-        }
-      })();
-    }
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    requestUpdate();
 
     return () => {
       disposed = true;
-      stopLoop();
-      intersectionObserver?.disconnect();
-      resizeObserver?.disconnect();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
+
+      if (scrollRaf) {
+        window.cancelAnimationFrame(scrollRaf);
+        scrollRaf = 0;
+      }
+
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
       reduceQuery.removeEventListener("change", onReducedMotionChange);
-      gsapContext?.revert();
+      resizeObserver?.disconnect();
+
+      images.forEach((frame) => {
+        frame.element.onload = null;
+        frame.element.onerror = null;
+      });
     };
-  }, [frameList, frameSet, isMobile, pinTarget]);
+  }, [frameList, frameSet, isMobile]);
 
   return (
     <div

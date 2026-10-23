@@ -354,7 +354,6 @@ function PortfolioContent({
                     mobileFrames={site.hero.laptopMobileFrames}
                     intro={aboutIntro}
                     mark={t.visual.portfolio}
-                    pinTarget={aboutSectionRef}
                   />
                 </LazyOnView>
               ) : null}
