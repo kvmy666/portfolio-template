@@ -53,7 +53,8 @@
   },
   "hero": {
     "photo": null,
-    "laptopFrames": null
+    "laptopFrames": null,
+    "laptopMobileFrames": null
   },
   "about": {
     "intro": {

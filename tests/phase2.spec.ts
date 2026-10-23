@@ -1,4 +1,15 @@
+import siteJson from "../content/site.json";
 import { expect, test } from "./fixtures";
+
+type HeroMediaConfig = {
+  laptopFrames?: string[] | null;
+  laptopMobileFrames?: string[] | null;
+};
+
+const heroMedia = siteJson.hero as unknown as HeroMediaConfig;
+const mobileLaptopFrames = heroMedia.laptopMobileFrames ?? [];
+const expectedMobileLaptopMode =
+  mobileLaptopFrames.length > 0 ? "frames" : "css";
 
 function trackConsoleErrors(page: import("@playwright/test").Page) {
   const errors: string[] = [];
@@ -108,6 +119,84 @@ function readLaptopProgress(page: import("@playwright/test").Page) {
     );
 }
 
+async function assertCenteredLaptopScrub(
+  page: import("@playwright/test").Page,
+) {
+  const visual = page.locator("[data-laptop-visual]");
+  await expect(visual).toHaveAttribute("data-laptop-gsap", "native");
+  await expect(visual).toHaveAttribute("data-laptop-pinned", "false");
+
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+  });
+
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 20_000 })
+    .toBeLessThan(0.05);
+
+  const { absTop, viewportHeight } = await visual.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      absTop: rect.top + window.scrollY,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  const startY = absTop - viewportHeight * 0.8;
+  const endY = absTop - viewportHeight * 0.05;
+
+  const scrollToRatio = (ratio: number) => {
+    const y = startY + (endY - startY) * ratio;
+
+    return page.evaluate((scrollTop) => {
+      window.scrollTo(0, scrollTop);
+      window.dispatchEvent(new Event("scroll"));
+    }, y);
+  };
+
+  const inViewport = () =>
+    visual.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        bottom: rect.bottom,
+        top: rect.top,
+        viewportHeight: window.innerHeight,
+      };
+    });
+
+  await scrollToRatio(0.2);
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 5000 })
+    .toBeGreaterThan(0.4);
+
+  const openingRect = await inViewport();
+  expect(openingRect.top).toBeLessThan(openingRect.viewportHeight);
+  expect(openingRect.bottom).toBeGreaterThan(0);
+
+  await scrollToRatio(0.5);
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 5000 })
+    .toBeGreaterThan(0.9);
+
+  await scrollToRatio(0.9);
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 5000 })
+    .toBeLessThan(0.4);
+
+  const closingRect = await inViewport();
+  expect(closingRect.top).toBeLessThan(closingRect.viewportHeight);
+  expect(closingRect.bottom).toBeGreaterThan(0);
+
+  await scrollToRatio(1);
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 5000 })
+    .toBeLessThan(0.05);
+
+  await scrollToRatio(0.5);
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 5000 })
+    .toBeGreaterThan(0.9);
+}
+
 test("laptop scrub responds to desktop scroll", { tag: "@phase2" }, async ({
   page,
 }) => {
@@ -117,47 +206,34 @@ test("laptop scrub responds to desktop scroll", { tag: "@phase2" }, async ({
   const visual = page.locator("[data-laptop-visual]");
   await expect(visual).toBeVisible();
   await expect(visual).toHaveAttribute("data-laptop-mode", "css");
-  await expect(visual).toHaveAttribute("data-laptop-pinned", "true");
 
-  const aboutTop = await page.locator("#about").evaluate((element) => {
-    return element.getBoundingClientRect().top + window.scrollY;
-  });
-
-  await page.evaluate((scrollTop) => {
-    window.scrollTo(0, scrollTop);
-  }, aboutTop + 500);
-
-  await expect
-    .poll(() => readLaptopProgress(page), { timeout: 5000 })
-    .toBeGreaterThan(0.15);
-
-  const progress = await readLaptopProgress(page);
-  expect(progress).toBeLessThanOrEqual(1);
+  await assertCenteredLaptopScrub(page);
 });
 
-test("laptop auto-plays once on mobile", { tag: "@phase2" }, async ({
+test("laptop scrub responds to mobile scroll", { tag: "@phase2" }, async ({
   page,
 }) => {
+  test.setTimeout(90_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "networkidle" });
 
   const visual = page.locator("[data-laptop-visual]");
-  await expect(visual).toBeVisible();
-  await expect(visual).toHaveAttribute("data-laptop-autoplay", "true");
-  await expect(visual).not.toHaveAttribute("data-laptop-gsap", "true");
+  await expect(visual).toBeVisible({ timeout: 20_000 });
+  await expect(visual).toHaveAttribute(
+    "data-laptop-mode",
+    expectedMobileLaptopMode,
+  );
 
-  await page.evaluate(() => {
-    document.querySelector("#about")?.scrollIntoView({
-      block: "center",
-      behavior: "instant",
-    } as ScrollIntoViewOptions);
-  });
+  if (expectedMobileLaptopMode === "frames") {
+    await expect(visual.locator("canvas.laptop-frame-canvas")).toBeVisible();
+    await expect(visual).toHaveAttribute("data-laptop-frame-set", "mobile");
+    await expect(visual).toHaveAttribute(
+      "data-laptop-frames",
+      String(mobileLaptopFrames.length),
+    );
+  }
 
-  // CI WebKit can need more than 4s for the lazy section + 1.8s autoplay to settle.
-  await expect
-    .poll(() => readLaptopProgress(page), { timeout: 12000 })
-    .toBeGreaterThanOrEqual(0.99);
-  await expect(visual).toHaveAttribute("data-laptop-autoplayed", "true");
+  await assertCenteredLaptopScrub(page);
 });
 
 test("reduced motion opens the laptop statically", { tag: "@phase2" }, async ({
@@ -169,6 +245,7 @@ test("reduced motion opens the laptop statically", { tag: "@phase2" }, async ({
 
   const visual = page.locator("[data-laptop-visual]");
   await expect(visual).toBeVisible();
+  await expect(visual).toHaveAttribute("data-laptop-gsap", "native");
   await expect(visual).toHaveAttribute("data-laptop-pinned", "false");
   await expect(visual).toHaveAttribute("data-laptop-autoplay", "false");
   await expect.poll(() => readLaptopProgress(page)).toBeCloseTo(1, 3);

@@ -351,9 +351,9 @@ function PortfolioContent({
                 <LazyOnView placeholder={<LaptopScrubSkeleton />}>
                   <LaptopScrub
                     frames={site.hero.laptopFrames}
+                    mobileFrames={site.hero.laptopMobileFrames}
                     intro={aboutIntro}
                     mark={t.visual.portfolio}
-                    pinTarget={aboutSectionRef}
                   />
                 </LazyOnView>
               ) : null}
