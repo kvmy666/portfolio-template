@@ -5,29 +5,35 @@ Router site, React 19, TypeScript, Tailwind CSS v4, validated JSON content,
 client-side locales, a desktop dock and mobile bar, and a setup wizard that
 turns the demo into your portfolio.
 
-The included persona, projects, screenshots, and assets are fictional demo
-content. Replace them with your own work.
+The screenshots below show the author's live portfolio at
+[abdulkarim.dev](https://abdulkarim.dev), built with this template. The
+repository's own demo persona, projects, and assets remain fictional; replace
+them with your own work.
 
 ## Screenshots
 
-| Home (English, dark)                                                              | Home (Arabic, RTL)                                                                    |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| ![Home page in English with the vertical dock](docs/screenshots/home-dark-en.png) | ![Home page in Arabic with a right-to-left layout](docs/screenshots/home-dark-ar.png) |
+| Home (English, dark)                                                          | Home (Arabic, RTL)                                                            |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| ![Live portfolio home in English](docs/screenshots/home-dark-en.png)          | ![Live portfolio home in Arabic](docs/screenshots/home-dark-ar.png)            |
 
-| Project detail                                                                           | Mobile home                                                                          |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| ![Demo project detail page with lenses and metrics](docs/screenshots/project-detail.png) | ![Mobile home page with the bottom navigation bar](docs/screenshots/mobile-home.png) |
+| Project detail                                                             | Mobile home                                                          |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| ![Live project detail page](docs/screenshots/project-detail.png)           | ![Live mobile home page](docs/screenshots/mobile-home.png)            |
 
 ## 🤖 Copy this message for your agent
 
 ```
-Set up this portfolio template for me. First ask me:
-1) How many projects do I have (0–50)?
-2) Do I want English only, or English + another language (Arabic or any other)?
-3) My name, role, links (GitHub/LinkedIn/website), and contact email.
-4) Do I want a CV, contact form, live metrics, 3D hero, and laptop animation?
+Set up this portfolio template for me. Read AGENTS.md first.
 
-Then run `npm run setup`, fill in my content under `content/`, replace the demo assets, and run `npm run build` and `npm test` to verify. Do not invent personal data.
+Ask me only for:
+1) How many projects I have (0–50).
+2) English only, or English plus another locale.
+3) My name, role, pitch, public email, and canonical site URL.
+4) GitHub, LinkedIn, and website links (or none).
+5) Optional: CV PDF path, CV DOCX download path, hero photo, and laptop frame sequence.
+6) Which features to enable: CV, contact, metrics, 3D hero, and laptop.
+
+Then run `npm run setup` (interactive, or with the flags in docs/SETUP.md), replace the demo content and demo images with mine, keep any project marked `"demo": false`, and run `npm run verify:fast` plus `node scripts/check-privacy.mjs`. Never invent personal data, commit secrets, or weaken the privacy scan, budgets, or tests.
 ```
 
 For a richer agent brief, see [`AGENTS.md`](AGENTS.md).
@@ -132,6 +138,7 @@ the build fails with a path-specific error if a value is invalid.
 | `cv.downloadFile`   | site path or null       | Optional download path (DOCX) while `cv.file` stays the preview |
 | `hero.photo`        | site path or null       | Hero portrait; null uses the demo avatar                        |
 | `hero.laptopFrames` | site path array or null | Scroll-scrub frame sequence; null uses the CSS demo laptop      |
+| `hero.laptopMobileFrames` | site path array or null | Optional mobile frame sequence; null reuses the desktop frames |
 | `about.intro`       | localized string        | About section copy and laptop-screen intro                      |
 | `contact.recipient` | email                   | Contact recipient                                               |
 | `contact.labels`    | localized string array  | Options for the contact form Label field                        |

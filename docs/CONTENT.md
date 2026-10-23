@@ -25,6 +25,7 @@ clear error if it is invalid.
 | `cv.downloadFile`   | site path or null       | Optional file that overrides only the download (e.g. a DOCX)  |
 | `hero.photo`        | site path or null       | Hero portrait; null keeps the demo avatar                     |
 | `hero.laptopFrames` | site path array or null | Frame sequence for the About laptop scrub                     |
+| `hero.laptopMobileFrames` | site path array or null | Optional mobile frame sequence; null reuses the desktop frames |
 | `about.intro`       | localized string        | About copy and the laptop screen intro                        |
 | `contact.recipient` | email                   | Contact form recipient                                        |
 | `contact.labels`    | localized string array  | Options for the contact form Label field                      |
@@ -73,8 +74,10 @@ Recommended: 60–90 WebP frames, no more than 2.5 MB total. Every path must
 start with `/` and point at a file under `public/`. The frames are preloaded and
 drawn into a fixed 16:10 canvas container, so the page does not shift. With
 `null` (the template default) the About section uses a CSS 3D laptop instead.
-Desktop pins the section and scrubs with GSAP; mobile auto-plays the opening
-once; reduced motion shows the open state immediately.
+The scrub is native and scroll-driven (no GSAP and no scroll pin) on desktop and
+mobile. Set `hero.laptopMobileFrames` for a smaller mobile sequence; when it is
+`null`, mobile reuses `hero.laptopFrames`. Reduced motion shows the open state
+immediately.
 
 ## CV
 
