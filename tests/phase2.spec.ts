@@ -7,6 +7,9 @@ type HeroMediaConfig = {
 };
 
 const heroMedia = siteJson.hero as unknown as HeroMediaConfig;
+const desktopLaptopFrames = heroMedia.laptopFrames ?? [];
+const expectedDesktopLaptopMode =
+  desktopLaptopFrames.length > 0 ? "frames" : "css";
 const mobileLaptopFrames = heroMedia.laptopMobileFrames ?? [];
 const expectedMobileLaptopMode =
   mobileLaptopFrames.length > 0 ? "frames" : "css";
@@ -205,7 +208,10 @@ test("laptop scrub responds to desktop scroll", { tag: "@phase2" }, async ({
 
   const visual = page.locator("[data-laptop-visual]");
   await expect(visual).toBeVisible();
-  await expect(visual).toHaveAttribute("data-laptop-mode", "css");
+  await expect(visual).toHaveAttribute(
+    "data-laptop-mode",
+    expectedDesktopLaptopMode,
+  );
 
   await assertCenteredLaptopScrub(page);
 });

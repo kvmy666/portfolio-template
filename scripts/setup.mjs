@@ -276,12 +276,16 @@ function laptopFrames(value) {
   }
 
   if (!Array.isArray(value)) {
-    fail("hero.laptopFrames must be null or an array of site paths");
+    fail(
+      "hero.laptopFrames and hero.laptopMobileFrames must be null or arrays of site paths",
+    );
   }
 
   const frames = value.map((frame) => {
     if (typeof frame !== "string" || !frame.trim().startsWith("/")) {
-      fail('Every hero.laptopFrames entry must start with "/"');
+      fail(
+        'Every hero.laptopFrames and hero.laptopMobileFrames entry must start with "/"',
+      );
     }
     return frame.trim();
   });
@@ -722,16 +726,18 @@ function validateSite(site) {
     fail('hero.photo must be null or an absolute site path starting with "/"');
   }
 
-  if (site.hero.laptopFrames !== null) {
-    if (
-      !Array.isArray(site.hero.laptopFrames) ||
-      site.hero.laptopFrames.some(
-        (frame) => typeof frame !== "string" || !frame.startsWith("/"),
-      )
-    ) {
-      fail(
-        'hero.laptopFrames must be null or an array of site paths starting with "/"',
-      );
+  for (const key of ["laptopFrames", "laptopMobileFrames"]) {
+    if (site.hero[key] !== null) {
+      if (
+        !Array.isArray(site.hero[key]) ||
+        site.hero[key].some(
+          (frame) => typeof frame !== "string" || !frame.startsWith("/"),
+        )
+      ) {
+        fail(
+          `hero.${key} must be null or an array of site paths starting with "/"`,
+        );
+      }
     }
   }
 
@@ -1075,6 +1081,7 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
           ? options.cv
           : savedCvFile(existingSite),
       laptopFrames: laptopFrames(existingSite.hero?.laptopFrames),
+      laptopMobileFrames: laptopFrames(existingSite.hero?.laptopMobileFrames),
       aboutIntro: isPlainObject(existingSite.about?.intro)
         ? existingSite.about.intro
         : DEFAULT_ABOUT_INTRO,
@@ -1121,6 +1128,9 @@ async function collectAnswers(rl, existingSite, projectCount, options) {
       ? options.photo
       : (existingSite.hero?.photo ?? null);
   answers.laptopFrames = laptopFrames(existingSite.hero?.laptopFrames);
+  answers.laptopMobileFrames = laptopFrames(
+    existingSite.hero?.laptopMobileFrames,
+  );
   answers.aboutIntro = isPlainObject(existingSite.about?.intro)
     ? existingSite.about.intro
     : DEFAULT_ABOUT_INTRO;
@@ -1209,6 +1219,7 @@ function buildSite(existingSite, answers) {
     hero: {
       photo: answers.photo ?? null,
       laptopFrames: laptopFrames(answers.laptopFrames),
+      laptopMobileFrames: laptopFrames(answers.laptopMobileFrames),
     },
     about: {
       intro: aboutIntro,

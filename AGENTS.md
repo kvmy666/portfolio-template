@@ -43,7 +43,10 @@ Ask only what you need, then write the answers down before changing files.
 
 - Display name, role, pitch, public email, canonical site URL.
 - GitHub, LinkedIn, and website links (or none).
-- CV PDF path, hero photo path, and laptop frame sequence (all optional).
+- CV PDF path, hero photo path, and laptop frame sequences (all optional).
+  `cv.downloadFile` is an optional DOCX used only for the download while
+  `cv.file` stays the preview; `hero.laptopMobileFrames` is an optional mobile
+  frame sequence that falls back to `hero.laptopFrames` when null.
 - Contact recipient and the labels the contact form should offer.
 
 **Optional features**
@@ -134,6 +137,8 @@ Rules of thumb:
 - Optional UI is dynamically imported and gated by feature flags.
 - Locale selection is client-side (no locale route prefix) and updates `lang`
   and `dir` without navigation.
+- `LaptopScrub.tsx` uses native scroll-driven frames (no GSAP and no scroll
+  pin), so any change must stay within the Lighthouse script budget.
 
 ## 5. Do not
 
