@@ -8,25 +8,26 @@ All content is data. No personal values belong in React components.
 `src/content/schema.ts`. `site.config.ts` parses it at build time and throws a
 clear error if it is invalid.
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| `name` | string | Display name |
-| `role` | localized string | The default locale key is required |
-| `pitch` | localized string | Short introduction |
-| `email` | email | Contact address |
-| `url` | URL | Public site URL used for canonical metadata and origin checks |
-| `links.github` | URL or null | Optional |
-| `links.linkedin` | URL or null | Optional |
-| `links.website` | URL or null | Optional |
-| `defaultLocale` | locale code | Must appear in `locales` |
-| `locales` | locale array | Unique `code`, `label`, `dir`, `htmlLang` |
-| `features` | object | Five boolean feature flags |
-| `cv.file` | site path or null | PDF shown in the CV modal and offered as a download |
-| `hero.photo` | site path or null | Hero portrait; null keeps the demo avatar |
-| `hero.laptopFrames` | site path array or null | Frame sequence for the About laptop scrub |
-| `about.intro` | localized string | About copy and the laptop screen intro |
-| `contact.recipient` | email | Contact form recipient |
-| `contact.labels` | localized string array | Options for the contact form Label field |
+| Field               | Type                    | Notes                                                         |
+| ------------------- | ----------------------- | ------------------------------------------------------------- |
+| `name`              | string                  | Display name                                                  |
+| `role`              | localized string        | The default locale key is required                            |
+| `pitch`             | localized string        | Short introduction                                            |
+| `email`             | email                   | Contact address                                               |
+| `url`               | URL                     | Public site URL used for canonical metadata and origin checks |
+| `links.github`      | URL or null             | Optional                                                      |
+| `links.linkedin`    | URL or null             | Optional                                                      |
+| `links.website`     | URL or null             | Optional                                                      |
+| `defaultLocale`     | locale code             | Must appear in `locales`                                      |
+| `locales`           | locale array            | Unique `code`, `label`, `dir`, `htmlLang`                     |
+| `features`          | object                  | Five boolean feature flags                                    |
+| `cv.file`           | site path or null       | PDF shown in the CV modal and offered as a download           |
+| `cv.downloadFile`   | site path or null       | Optional file that overrides only the download (e.g. a DOCX)  |
+| `hero.photo`        | site path or null       | Hero portrait; null keeps the demo avatar                     |
+| `hero.laptopFrames` | site path array or null | Frame sequence for the About laptop scrub                     |
+| `about.intro`       | localized string        | About copy and the laptop screen intro                        |
+| `contact.recipient` | email                   | Contact form recipient                                        |
+| `contact.labels`    | localized string array  | Options for the contact form Label field                      |
 
 Localized values are objects keyed by locale code:
 
@@ -84,7 +85,9 @@ one-page `public/demo/cv.pdf`; replace it with your own file.
 The same PDF is used for both locales (CV content is not localized). The UI
 labels around it come from `content/locales/*.json` under `cv`. The section
 offers **View CV** (opens the native dialog preview), **Download** (the file
-`download` attribute), and **Open in new tab** inside the dialog.
+`download` attribute), and **Open in new tab** inside the dialog. `cv.file` is
+the PDF used for preview, while `cv.downloadFile` (optional) overrides only the
+download, e.g. a DOCX.
 
 ## Contact form
 
@@ -106,13 +109,13 @@ for the contact API (localhost is allowed for development).
 
 ## Feature flags
 
-| Flag | Effect |
-| --- | --- |
-| `cv` | Shows the CV section when `cv.file` is set |
-| `contact` | Shows the contact form and dock link |
-| `metrics` | Shows live metrics when a project has sources or fallback values |
-| `splash3d` | Shows the 3D hero card |
-| `laptop` | Shows the scroll-driven laptop visual |
+| Flag       | Effect                                                           |
+| ---------- | ---------------------------------------------------------------- |
+| `cv`       | Shows the CV section when `cv.file` is set                       |
+| `contact`  | Shows the contact form and dock link                             |
+| `metrics`  | Shows live metrics when a project has sources or fallback values |
+| `splash3d` | Shows the 3D hero card                                           |
+| `laptop`   | Shows the scroll-driven laptop visual                            |
 
 Flags are independent. Turning all of them off leaves a text-first page.
 
@@ -134,12 +137,16 @@ sorted by `order`, then by slug. Duplicate slugs are rejected.
   "features": [
     {
       "title": { "en": "Fast first paint" },
-      "oneLiner": { "en": "A server-rendered shell reaches the screen quickly." },
+      "oneLiner": {
+        "en": "A server-rendered shell reaches the screen quickly."
+      },
       "description": { "en": "Why this matters." },
       "tags": ["Performance", "UX"],
       "media": {
         "src": "/demo/feature-1.svg",
-        "alt": { "en": "Abstract dashboard with a fast-loading page skeleton." },
+        "alt": {
+          "en": "Abstract dashboard with a fast-loading page skeleton."
+        },
         "type": "image"
       },
       "evidence": { "en": "Measured with a Lighthouse budget on every build." }
@@ -193,6 +200,7 @@ the cached value. Network
 failures, rate limits, and malformed responses are silent: the static `metrics`
 fallback remains on screen. The template intentionally does not show Google
 Play install counts or review status.
+
 - `deepDive.architecture` is `null` or a localized string.
 - `deepDive.code` is `null` or `{ "language": string, "snippet": string }`.
   When both deep-dive fields are null the section is omitted.

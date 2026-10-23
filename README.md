@@ -10,12 +10,12 @@ content. Replace them with your own work.
 
 ## Screenshots
 
-| Home (English, dark) | Home (Arabic, RTL) |
-| --- | --- |
+| Home (English, dark)                                                              | Home (Arabic, RTL)                                                                    |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | ![Home page in English with the vertical dock](docs/screenshots/home-dark-en.png) | ![Home page in Arabic with a right-to-left layout](docs/screenshots/home-dark-ar.png) |
 
-| Project detail | Mobile home |
-| --- | --- |
+| Project detail                                                                           | Mobile home                                                                          |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | ![Demo project detail page with lenses and metrics](docs/screenshots/project-detail.png) | ![Mobile home page with the bottom navigation bar](docs/screenshots/mobile-home.png) |
 
 ## 🤖 Copy this message for your agent
@@ -93,23 +93,23 @@ See [`docs/SETUP.md`](docs/SETUP.md) for every flag, and
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the development server |
-| `npm run build` | Production build plus first-load budget check |
-| `npm start` | Serve the production build |
-| `npm run setup` | Configure identity, projects, locales, and features |
-| `npm run typecheck` | TypeScript, no emit |
-| `npm run lint` | ESLint |
-| `npm test` | Vitest unit tests |
-| `npm run test:e2e` | Playwright end-to-end tests |
-| `npm run test:a11y` | Playwright + axe accessibility tests |
-| `npm run test:visual` | Visual Playwright tests |
-| `npm run test:fps` | FPS harness (tagged `@fps`) |
-| `npm run size` | Check the configured first-load and CSS budgets |
-| `npm run lighthouse` | Lighthouse CI against home and project detail |
-| `npm run knip` | Detect unused files and exports |
-| `npm run verify:fast` | Typecheck, lint, unit tests, knip, privacy scan |
+| Command               | Purpose                                             |
+| --------------------- | --------------------------------------------------- |
+| `npm run dev`         | Start the development server                        |
+| `npm run build`       | Production build plus first-load budget check       |
+| `npm start`           | Serve the production build                          |
+| `npm run setup`       | Configure identity, projects, locales, and features |
+| `npm run typecheck`   | TypeScript, no emit                                 |
+| `npm run lint`        | ESLint                                              |
+| `npm test`            | Vitest unit tests                                   |
+| `npm run test:e2e`    | Playwright end-to-end tests                         |
+| `npm run test:a11y`   | Playwright + axe accessibility tests                |
+| `npm run test:visual` | Visual Playwright tests                             |
+| `npm run test:fps`    | FPS harness (tagged `@fps`)                         |
+| `npm run size`        | Check the configured first-load and CSS budgets     |
+| `npm run lighthouse`  | Lighthouse CI against home and project detail       |
+| `npm run knip`        | Detect unused files and exports                     |
+| `npm run verify:fast` | Typecheck, lint, unit tests, knip, privacy scan     |
 
 ## Configuration reference
 
@@ -117,23 +117,24 @@ See [`docs/SETUP.md`](docs/SETUP.md) for every flag, and
 `SiteConfigSchema` in `src/content/schema.ts`, parsed by `site.config.ts`, and
 the build fails with a path-specific error if a value is invalid.
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| `name` | string | Your display name |
-| `role` | localized string | Required in the default locale |
-| `pitch` | localized string | Required in the default locale |
-| `email` | email | Public contact address |
-| `url` | URL | Canonical site URL and allowed contact origin |
-| `links` | object | `github`, `linkedin`, and `website` are URL or null |
-| `defaultLocale` | locale code | Must appear in `locales` |
-| `locales` | array | Each locale has `code`, `label`, `dir`, `htmlLang` |
-| `features` | object | Five boolean feature flags |
-| `cv.file` | site path or null | PDF previewed and downloaded in the CV section |
-| `hero.photo` | site path or null | Hero portrait; null uses the demo avatar |
-| `hero.laptopFrames` | site path array or null | Scroll-scrub frame sequence; null uses the CSS demo laptop |
-| `about.intro` | localized string | About section copy and laptop-screen intro |
-| `contact.recipient` | email | Contact recipient |
-| `contact.labels` | localized string array | Options for the contact form Label field |
+| Field               | Type                    | Notes                                                           |
+| ------------------- | ----------------------- | --------------------------------------------------------------- |
+| `name`              | string                  | Your display name                                               |
+| `role`              | localized string        | Required in the default locale                                  |
+| `pitch`             | localized string        | Required in the default locale                                  |
+| `email`             | email                   | Public contact address                                          |
+| `url`               | URL                     | Canonical site URL and allowed contact origin                   |
+| `links`             | object                  | `github`, `linkedin`, and `website` are URL or null             |
+| `defaultLocale`     | locale code             | Must appear in `locales`                                        |
+| `locales`           | array                   | Each locale has `code`, `label`, `dir`, `htmlLang`              |
+| `features`          | object                  | Five boolean feature flags                                      |
+| `cv.file`           | site path or null       | PDF previewed in the CV section                                 |
+| `cv.downloadFile`   | site path or null       | Optional download path (DOCX) while `cv.file` stays the preview |
+| `hero.photo`        | site path or null       | Hero portrait; null uses the demo avatar                        |
+| `hero.laptopFrames` | site path array or null | Scroll-scrub frame sequence; null uses the CSS demo laptop      |
+| `about.intro`       | localized string        | About section copy and laptop-screen intro                      |
+| `contact.recipient` | email                   | Contact recipient                                               |
+| `contact.labels`    | localized string array  | Options for the contact form Label field                        |
 
 Localized values are objects keyed by locale code. The default locale key is
 required. Unknown locales in site-level localized values are rejected, and
@@ -143,13 +144,13 @@ unknown top-level keys fail validation.
 
 Set any flag to `false` to remove that part of the page:
 
-| Flag | Controls |
-| --- | --- |
-| `cv` | CV section with preview modal, download, and new-tab link |
-| `contact` | Contact form and dock link |
-| `metrics` | Live downloads and GitHub stars, with static fallbacks |
-| `splash3d` | 3D hero card |
-| `laptop` | Scroll-driven laptop visual |
+| Flag       | Controls                                                  |
+| ---------- | --------------------------------------------------------- |
+| `cv`       | CV section with preview modal, download, and new-tab link |
+| `contact`  | Contact form and dock link                                |
+| `metrics`  | Live downloads and GitHub stars, with static fallbacks    |
+| `splash3d` | 3D hero card                                              |
+| `laptop`   | Scroll-driven laptop visual                               |
 
 The page remains usable with every flag disabled.
 
@@ -171,12 +172,16 @@ minimal project looks like this:
   "features": [
     {
       "title": { "en": "Fast first paint" },
-      "oneLiner": { "en": "A server-rendered shell reaches the screen quickly." },
+      "oneLiner": {
+        "en": "A server-rendered shell reaches the screen quickly."
+      },
       "description": { "en": "Why this feature matters." },
       "tags": ["Performance", "UX"],
       "media": {
         "src": "/demo/feature-1.svg",
-        "alt": { "en": "Abstract dashboard with a fast-loading page skeleton." },
+        "alt": {
+          "en": "Abstract dashboard with a fast-loading page skeleton."
+        },
         "type": "image"
       },
       "evidence": { "en": "Measured with a performance budget on every build." }
@@ -306,11 +311,11 @@ regenerate all of the above.
 `npm run build` compiles with Next.js and then runs
 `scripts/first-load-budget.mjs`. The route budgets are:
 
-| Route | First-load JS (gzip) |
-| --- | --- |
-| `/` | 180 kB |
-| `/projects/[slug]` | 180 kB |
-| All CSS | 30 kB |
+| Route              | First-load JS (gzip) |
+| ------------------ | -------------------- |
+| `/`                | 180 kB               |
+| `/projects/[slug]` | 180 kB               |
+| All CSS            | 30 kB                |
 
 `npm run size` checks the same assets through size-limit, and
 `npm run lighthouse` runs Lighthouse CI three times against the home page and a

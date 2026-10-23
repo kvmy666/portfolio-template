@@ -42,11 +42,13 @@ const ContactSchema = z.strictObject({
 });
 
 const CvSchema = z.strictObject({
-  file: z
+  file: z.string().trim().regex(/^\//, "CV paths must start with /").nullable(),
+  downloadFile: z
     .string()
     .trim()
     .regex(/^\//, "CV paths must start with /")
-    .nullable(),
+    .nullable()
+    .optional(),
 });
 
 const HeroSchema = z.strictObject({
@@ -57,10 +59,7 @@ const HeroSchema = z.strictObject({
     .nullable(),
   laptopFrames: z
     .array(
-      z
-        .string()
-        .trim()
-        .regex(/^\//, "Laptop frame paths must start with /"),
+      z.string().trim().regex(/^\//, "Laptop frame paths must start with /"),
     )
     .nullable(),
 });
@@ -162,13 +161,13 @@ export const SiteConfigSchema = z
 
     rejectUnknownLocaleKeys(config.role, codes, ["role"], ctx);
     rejectUnknownLocaleKeys(config.pitch, codes, ["pitch"], ctx);
+    rejectUnknownLocaleKeys(config.about.intro, codes, ["about", "intro"], ctx);
     rejectUnknownLocaleKeys(
-      config.about.intro,
+      config.contact.labels,
       codes,
-      ["about", "intro"],
+      ["contact", "labels"],
       ctx,
     );
-    rejectUnknownLocaleKeys(config.contact.labels, codes, ["contact", "labels"], ctx);
   });
 
 export const featureTagSchema = z.enum([
@@ -179,10 +178,7 @@ export const featureTagSchema = z.enum([
 ]);
 
 export const MediaSchema = z.strictObject({
-  src: z
-    .string()
-    .trim()
-    .regex(/^\//, "Media paths must start with /"),
+  src: z.string().trim().regex(/^\//, "Media paths must start with /"),
   alt: LocalizedStringSchema,
   type: z.enum(["image", "video"]),
 });
