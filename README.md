@@ -50,7 +50,8 @@ For a richer agent brief, see [`AGENTS.md`](AGENTS.md).
 - Zod-validated site config, projects, and locale dictionaries with actionable
   build errors
 - SEO: canonical URLs, Open Graph/Twitter metadata, JSON-LD, sitemap, robots,
-  and a generated 1200×630 social image
+  a generated 1200×630 social image, `www` requests 301 to the canonical host,
+  and noindex preview hosts
 - Accessibility coverage with Playwright + axe, keyboard-friendly controls, and
   skip navigation
 - Performance gates: per-route first-load JavaScript budgets, CSS budget,
