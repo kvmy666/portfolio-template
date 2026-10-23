@@ -1,15 +1,23 @@
+/// <reference types="vite/client" />
+
 import { describe, expect, it } from "vitest";
 
-import demo1 from "../../content/projects/demo-1.json";
-import demo2 from "../../content/projects/demo-2.json";
-import demo3 from "../../content/projects/demo-3.json";
 import {
   hasCuratedTechQuery,
   techSearchHref,
   techSearchQuery,
 } from "./tech-search";
 
-const projects = [demo1, demo2, demo3];
+// Glob so the test still compiles when setup removes demo projects.
+const projectModules = import.meta.glob<{
+  default?: { tech: string[] };
+  tech?: string[];
+}>("../../content/projects/*.json", { eager: true });
+
+const technologies = Object.values(projectModules).flatMap((module) => {
+  const project = module.default ?? module;
+  return project.tech ?? [];
+});
 
 describe("techSearchHref", () => {
   it("builds the exact URL for a curated plain name", () => {
@@ -46,8 +54,8 @@ describe("techSearchHref", () => {
 
 describe("project technology coverage", () => {
   it("has a curated query for every technology label", () => {
-    const missing = projects.flatMap((project) =>
-      project.tech.filter((technology) => !hasCuratedTechQuery(technology)),
+    const missing = technologies.filter(
+      (technology) => !hasCuratedTechQuery(technology),
     );
 
     expect(missing).toEqual([]);
