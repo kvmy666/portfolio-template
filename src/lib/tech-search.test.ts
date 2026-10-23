@@ -1,4 +1,5 @@
-/// <reference types="vite/client" />
+import fs from "node:fs";
+import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -8,16 +9,18 @@ import {
   techSearchQuery,
 } from "./tech-search";
 
-// Glob so the test still compiles when setup removes demo projects.
-const projectModules = import.meta.glob<{
-  default?: { tech: string[] };
-  tech?: string[];
-}>("../../content/projects/*.json", { eager: true });
+type DemoProject = { tech?: unknown };
 
-const technologies = Object.values(projectModules).flatMap((module) => {
-  const project = module.default ?? module;
-  return project.tech ?? [];
-});
+// Read from disk so the test still compiles when setup removes demo projects.
+const projectsDir = path.join(process.cwd(), "content", "projects");
+const demoProjects: DemoProject[] = fs.existsSync(projectsDir)
+  ? fs
+      .readdirSync(projectsDir)
+      .filter((file) => file.endsWith(".json"))
+      .map((file) =>
+        JSON.parse(fs.readFileSync(path.join(projectsDir, file), "utf8")),
+      )
+  : [];
 
 describe("techSearchHref", () => {
   it("builds the exact URL for a curated plain name", () => {
@@ -54,10 +57,14 @@ describe("techSearchHref", () => {
 
 describe("project technology coverage", () => {
   it("has a curated query for every technology label", () => {
-    const missing = technologies.filter(
-      (technology) => !hasCuratedTechQuery(technology),
-    );
+    for (const project of demoProjects) {
+      const tech = Array.isArray(project.tech) ? project.tech : [];
+      const missing = tech.filter(
+        (technology) =>
+          typeof technology === "string" && !hasCuratedTechQuery(technology),
+      );
 
-    expect(missing).toEqual([]);
+      expect(missing).toEqual([]);
+    }
   });
 });
