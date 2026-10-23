@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { BackArrow } from "./BackArrow";
 import { useLocale } from "./LocaleProvider";
 
 function SunIcon() {
@@ -83,7 +85,8 @@ function LocaleSwitcher() {
   const label = `${current.code.toUpperCase()} — ${t.ui.changeLanguage}: ${current.label}`;
 
   if (locales.length === 2) {
-    const nextIndex = (locales.findIndex((item) => item.code === locale) + 1) % locales.length;
+    const nextIndex =
+      (locales.findIndex((item) => item.code === locale) + 1) % locales.length;
     const next = locales[nextIndex];
 
     return (
@@ -181,11 +184,25 @@ function ThemeToggle() {
   );
 }
 
-export function Utilities() {
+export function Utilities({ backHref }: { backHref?: string }) {
   const { t } = useLocale();
 
   return (
-    <aside className="utilities" aria-label={t.ui.siteControls}>
+    <aside
+      className="utilities ltr:flex-row-reverse"
+      aria-label={t.ui.siteControls}
+    >
+      {backHref ? (
+        <Link
+          prefetch={false}
+          href={backHref}
+          className="utility-button"
+          aria-label={t.projectDetail.backToProjects}
+          title={t.projectDetail.backToProjects}
+        >
+          <BackArrow />
+        </Link>
+      ) : null}
       <LocaleSwitcher />
       <ThemeToggle />
     </aside>

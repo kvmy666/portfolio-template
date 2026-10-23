@@ -12,11 +12,17 @@ import { useLocale } from "./LocaleProvider";
 
 type CVModalProps = {
   file: string;
+  downloadFile?: string | null;
   triggerRef?: RefObject<HTMLButtonElement | null>;
   onClose?: () => void;
 };
 
-export function CVModal({ file, triggerRef, onClose }: CVModalProps) {
+export function CVModal({
+  file,
+  downloadFile,
+  triggerRef,
+  onClose,
+}: CVModalProps) {
   const { t } = useLocale();
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -105,7 +111,7 @@ export function CVModal({ file, triggerRef, onClose }: CVModalProps) {
 
         <div className="cv-dialog-actions">
           <a
-            href={file}
+            href={downloadFile ?? file}
             download
             className="inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast transition hover:-translate-y-0.5"
           >

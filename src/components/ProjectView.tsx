@@ -3,7 +3,6 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type {
@@ -14,6 +13,7 @@ import type {
   Project,
   SiteConfig,
 } from "@/content/schema";
+import { techSearchHref } from "@/lib/tech-search";
 import { AppFrame } from "./AppFrame";
 import { useLocale } from "./LocaleProvider";
 import { ProjectMetrics } from "./ProjectMetrics";
@@ -48,17 +48,14 @@ type ProjectViewProps = {
   dictionaries: Record<string, LocaleStrings>;
 };
 
-export function ProjectView({
-  project,
-  site,
-  dictionaries,
-}: ProjectViewProps) {
+export function ProjectView({ project, site, dictionaries }: ProjectViewProps) {
   return (
     <AppFrame
       site={site}
       dictionaries={dictionaries}
       activeDockItem="projects"
       dockHrefPrefix="/"
+      backHref="/#projects"
     >
       <ProjectContent project={project} site={site} />
     </AppFrame>
@@ -85,9 +82,7 @@ function ProjectContent({
   }, []);
 
   const counts = useMemo(() => {
-    const map = new Map<FeatureTag, number>(
-      lenses.map((tag) => [tag, 0]),
-    );
+    const map = new Map<FeatureTag, number>(lenses.map((tag) => [tag, 0]));
 
     for (const feature of project.features) {
       for (const tag of feature.tags) {
@@ -111,9 +106,7 @@ function ProjectContent({
     : project.features;
 
   const platformKey =
-    project.platform === "cross-platform"
-      ? "crossPlatform"
-      : project.platform;
+    project.platform === "cross-platform" ? "crossPlatform" : project.platform;
   const playStoreHref = project.packageId
     ? (project.store ??
       `https://play.google.com/store/apps/details?id=${encodeURIComponent(
@@ -126,19 +119,6 @@ function ProjectContent({
 
   return (
     <main id="main" className="page-main page-container flex-1">
-      <div className="mb-8">
-        <Link
-          prefetch={false}
-          href="/#projects"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted transition hover:text-primary-text"
-        >
-          <span aria-hidden="true" className="inline-block rtl:rotate-180">
-            ←
-          </span>
-          {t.projectDetail.backToProjects}
-        </Link>
-      </div>
-
       <header className="rounded-xl border border-line bg-card p-8 shadow-sm sm:p-12">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
           <Image
@@ -162,12 +142,17 @@ function ProjectContent({
             {t.platforms[platformKey]}
           </span>
           {project.tech.slice(0, 3).map((technology) => (
-            <span
+            <a
               key={technology}
-              className="rounded-full border border-line bg-background px-3 py-1 text-xs text-muted"
+              href={techSearchHref(technology)}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`${technology} — Google (${t.projectDetail.openInNewTab})`}
+              aria-label={`${technology} — Google (${t.projectDetail.openInNewTab})`}
+              className="rounded-full border border-line bg-background px-3 py-1 text-xs text-muted transition duration-200 hover:border-accent/30 hover:bg-accent/10 hover:text-primary-text focus-visible:border-accent/30 focus-visible:bg-accent/10 focus-visible:text-primary-text"
             >
               {technology}
-            </span>
+            </a>
           ))}
         </div>
 
@@ -233,11 +218,17 @@ function ProjectContent({
         <h2 id="tech-stack-heading">{t.projectDetail.techStack}</h2>
         <ul className="mt-5 flex flex-wrap gap-2">
           {project.tech.map((technology) => (
-            <li
-              key={technology}
-              className="rounded-full border border-line bg-card px-3.5 py-1.5 text-sm text-muted"
-            >
-              {technology}
+            <li key={technology}>
+              <a
+                href={techSearchHref(technology)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`${technology} — Google (${t.projectDetail.openInNewTab})`}
+                aria-label={`${technology} — Google (${t.projectDetail.openInNewTab})`}
+                className="inline-block rounded-full border border-line bg-card px-3.5 py-1.5 text-sm text-muted transition duration-200 hover:border-accent/30 hover:bg-accent/10 hover:text-primary-text focus-visible:border-accent/30 focus-visible:bg-accent/10 focus-visible:text-primary-text"
+              >
+                {technology}
+              </a>
             </li>
           ))}
         </ul>
@@ -263,24 +254,25 @@ function ProjectContent({
               ({project.features.length})
             </span>
           </button>
-          {lenses.map((tag) => {
-            const count = counts.get(tag) ?? 0;
+          {lenses
+            .filter((tag) => (counts.get(tag) ?? 0) > 0)
+            .map((tag) => {
+              const count = counts.get(tag) ?? 0;
 
-            return (
-              <button
-                key={tag}
-                type="button"
-                aria-pressed={lens === tag}
-                disabled={count === 0}
-                onClick={() => selectLens(tag)}
-                data-testid={`lens-${tag.toLowerCase()}`}
-                className="rounded-full border border-line bg-card px-3.5 py-1.5 text-sm font-medium text-muted transition hover:border-accent/40 hover:text-primary-text aria-pressed:border-accent/40 aria-pressed:bg-accent/10 aria-pressed:text-primary-text disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t.tags[tag]}
-                <span className="ms-1.5 text-xs tabular-nums">({count})</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  aria-pressed={lens === tag}
+                  onClick={() => selectLens(tag)}
+                  data-testid={`lens-${tag.toLowerCase()}`}
+                  className="rounded-full border border-line bg-card px-3.5 py-1.5 text-sm font-medium text-muted transition hover:border-accent/40 hover:text-primary-text aria-pressed:border-accent/40 aria-pressed:bg-accent/10 aria-pressed:text-primary-text"
+                >
+                  {t.tags[tag]}
+                  <span className="ms-1.5 text-xs tabular-nums">({count})</span>
+                </button>
+              );
+            })}
         </div>
 
         {visibleFeatures.length === 0 ? (

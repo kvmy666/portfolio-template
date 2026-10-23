@@ -11,6 +11,7 @@ import type {
   Project,
   SiteConfig,
 } from "@/content/schema";
+import { techSearchHref } from "@/lib/tech-search";
 import { AppFrame } from "./AppFrame";
 import { useLocale } from "./LocaleProvider";
 import { ProjectMetrics } from "./ProjectMetrics";
@@ -109,11 +110,7 @@ function LazyOnView({
     return () => observer.disconnect();
   }, [rootMargin, visible]);
 
-  return (
-    <div ref={containerRef}>
-      {visible ? children : placeholder}
-    </div>
-  );
+  return <div ref={containerRef}>{visible ? children : placeholder}</div>;
 }
 
 function GithubMark() {
@@ -193,11 +190,12 @@ function PortfolioContent({
   const heroPhoto = site.hero.photo ?? "/demo/avatar.svg";
   const showDemoPhotoCaption = site.hero.photo === null;
   const cvFile = features.cv ? site.cv.file : null;
+  const cvDownloadFile = features.cv
+    ? (site.cv.downloadFile ?? site.cv.file)
+    : null;
 
   const socialLinks = [
-    site.links.github
-      ? { href: site.links.github, label: "GitHub" }
-      : null,
+    site.links.github ? { href: site.links.github, label: "GitHub" } : null,
     site.links.linkedin
       ? { href: site.links.linkedin, label: "LinkedIn" }
       : null,
@@ -416,89 +414,98 @@ function PortfolioContent({
                     : project.platform;
 
                 return (
-                  <article key={project.slug} className="h-full">
-                    <Link
-                      prefetch={false}
-                      href={`/projects/${project.slug}`}
-                      data-testid="showcase-card"
-                      className="group flex h-full flex-col rounded-lg border border-line bg-card p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <Image
-                              src={project.logo}
-                              alt=""
-                              width={52}
-                              height={52}
-                              unoptimized
-                              className="h-12 w-12 rounded-md border border-line bg-background object-contain"
-                            />
-                            {project.repo ? (
-                              <span
-                                className="inline-flex text-muted"
-                                title={t.projectDetail.github}
-                                data-testid="showcase-github"
-                              >
-                                <GithubMark />
-                                <span className="sr-only">
-                                  {t.projectDetail.github}
-                                </span>
+                  <article
+                    key={project.slug}
+                    className="group relative flex h-full flex-col rounded-lg border border-line bg-card p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-accent/30 hover:shadow-xl focus-within:border-accent/50"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <Image
+                            src={project.logo}
+                            alt=""
+                            width={52}
+                            height={52}
+                            unoptimized
+                            className="h-12 w-12 rounded-md border border-line bg-background object-contain"
+                          />
+                          {project.repo ? (
+                            <span
+                              className="inline-flex text-muted"
+                              title={t.projectDetail.github}
+                              data-testid="showcase-github"
+                            >
+                              <GithubMark />
+                              <span className="sr-only">
+                                {t.projectDetail.github}
                               </span>
-                            ) : null}
-                          </div>
-                          <div>
-                            <h3>
+                            </span>
+                          ) : null}
+                        </div>
+                        <div>
+                          <h3>
+                            <Link
+                              prefetch={false}
+                              href={`/projects/${project.slug}`}
+                              data-testid="showcase-card"
+                              className="after:absolute after:inset-0 after:content-['']"
+                            >
                               {localized(
                                 project.name,
                                 locale,
                                 site.defaultLocale,
                               )}
-                            </h3>
-                            <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-muted">
-                              {t.platforms[platformKey]}
-                            </p>
-                          </div>
+                            </Link>
+                          </h3>
+                          <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-muted">
+                            {t.platforms[platformKey]}
+                          </p>
                         </div>
-                        {project.demo ? (
-                          <span className="rounded-full border border-line bg-background px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted">
-                            {t.projects.demo}
-                          </span>
-                        ) : null}
                       </div>
-
-                      <p className="mt-5 flex-1 text-sm leading-6 text-muted">
-                        {localized(project.summary, locale, site.defaultLocale)}
-                      </p>
-
-                      {features.metrics ? (
-                        <ProjectMetrics
-                          slug={project.slug}
-                          sources={project.sources}
-                          fallback={
-                            project.metrics
-                              ? {
-                                  downloads: project.metrics.mirror,
-                                  stars: project.metrics.github,
-                                }
-                              : null
-                          }
-                          locale={locale}
-                          variant="card"
-                        />
+                      {project.demo ? (
+                        <span className="rounded-full border border-line bg-background px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted">
+                          {t.projects.demo}
+                        </span>
                       ) : null}
+                    </div>
 
-                      <ul className="mt-5 flex flex-wrap gap-1.5">
-                        {project.tech.map((technology) => (
-                          <li
-                            key={technology}
-                            className="rounded-full border border-line bg-background px-2.5 py-1 text-xs text-muted"
+                    <p className="mt-5 flex-1 text-sm leading-6 text-muted">
+                      {localized(project.summary, locale, site.defaultLocale)}
+                    </p>
+
+                    {features.metrics ? (
+                      <ProjectMetrics
+                        slug={project.slug}
+                        sources={project.sources}
+                        fallback={
+                          project.metrics
+                            ? {
+                                downloads: project.metrics.mirror,
+                                stars: project.metrics.github,
+                              }
+                            : null
+                        }
+                        locale={locale}
+                        variant="card"
+                      />
+                    ) : null}
+
+                    <ul className="mt-5 flex flex-wrap gap-1.5">
+                      {project.tech.map((technology) => (
+                        <li key={technology}>
+                          <a
+                            href={techSearchHref(technology)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`${technology} — Google (${t.projectDetail.openInNewTab})`}
+                            aria-label={`${technology} — Google (${t.projectDetail.openInNewTab})`}
+                            className="relative z-10 inline-block rounded-full border border-line bg-background px-2.5 py-1 text-xs text-muted transition duration-200 hover:border-accent/30 hover:bg-accent/10 hover:text-primary-text focus-visible:border-accent/30 focus-visible:bg-accent/10 focus-visible:text-primary-text"
                           >
                             {technology}
-                          </li>
-                        ))}
-                      </ul>
-                    </Link>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
                   </article>
                 );
               })}
@@ -522,7 +529,7 @@ function PortfolioContent({
                   {t.cv.view}
                 </button>
                 <a
-                  href={cvFile}
+                  href={cvDownloadFile ?? cvFile}
                   download
                   className="inline-flex items-center rounded-full border border-line bg-background px-5 py-3 text-sm font-semibold transition hover:border-accent/40 hover:text-primary-text"
                 >
@@ -532,6 +539,7 @@ function PortfolioContent({
               {cvOpen ? (
                 <CVModal
                   file={cvFile}
+                  downloadFile={cvDownloadFile}
                   triggerRef={cvTriggerRef}
                   onClose={() => setCvOpen(false)}
                 />

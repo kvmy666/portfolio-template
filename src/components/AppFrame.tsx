@@ -13,6 +13,7 @@ type AppFrameProps = {
   children: ReactNode;
   activeDockItem?: DockItemId;
   dockHrefPrefix?: string;
+  backHref?: string;
 };
 
 export function AppFrame({
@@ -21,6 +22,7 @@ export function AppFrame({
   children,
   activeDockItem,
   dockHrefPrefix,
+  backHref,
 }: AppFrameProps) {
   return (
     <LocaleProvider site={site} dictionaries={dictionaries}>
@@ -28,6 +30,7 @@ export function AppFrame({
         site={site}
         activeDockItem={activeDockItem}
         dockHrefPrefix={dockHrefPrefix}
+        backHref={backHref}
       >
         {children}
       </AppFrameChrome>
@@ -39,6 +42,7 @@ function AppFrameChrome({
   site,
   activeDockItem,
   dockHrefPrefix,
+  backHref,
   children,
 }: Omit<AppFrameProps, "dictionaries">) {
   const { t } = useLocale();
@@ -57,7 +61,7 @@ function AppFrameChrome({
         {t.ui.skipToContent}
       </a>
 
-      <Utilities />
+      <Utilities backHref={backHref} />
       <Dock
         features={site.features}
         activeOverride={activeDockItem}
