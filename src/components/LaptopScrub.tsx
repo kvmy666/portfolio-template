@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 const MOBILE_QUERY = "(max-width: 750px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-const MOBILE_AUTOPLAY_MS = 1800;
 const SMOOTHING = 10;
 const MAX_DEVICE_PIXEL_RATIO = 2;
 
 type LaptopScrubProps = {
   frames: string[] | null;
+  mobileFrames?: string[] | null;
   intro: string;
   mark: string;
   pinTarget: RefObject<HTMLElement | null>;
@@ -44,10 +44,28 @@ function nearestReadyFrame(images: FrameImage[], index: number): FrameImage | nu
   return null;
 }
 
-export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps) {
+export function LaptopScrub({
+  frames,
+  mobileFrames = null,
+  intro,
+  mark,
+  pinTarget,
+}: LaptopScrubProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameList = frames && frames.length > 0 ? frames : null;
+  const [isMobile] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia(MOBILE_QUERY).matches;
+  });
+
+  const mobileFrameList =
+    isMobile && mobileFrames && mobileFrames.length > 0 ? mobileFrames : null;
+  const activeFrames = mobileFrameList ?? frames;
+  const frameSet = mobileFrameList ? "mobile" : "desktop";
+  const frameList = activeFrames && activeFrames.length > 0 ? activeFrames : null;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -58,7 +76,6 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
 
     const canvas = frameList ? canvasRef.current : null;
     const pinElement = pinTarget.current ?? root;
-    const mobileQuery = window.matchMedia(MOBILE_QUERY);
     const reduceQuery = window.matchMedia(REDUCED_MOTION_QUERY);
     const images: FrameImage[] = [];
     let reduced = reduceQuery.matches;
@@ -69,9 +86,6 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
     let lastFrameTime = 0;
     let currentProgress = reduced ? 1 : 0;
     let targetProgress = currentProgress;
-    let mobileElapsed = 0;
-    let lastMobileTime = 0;
-    let mobileFinished = reduced;
     let gsapContext: { revert: () => void } | null = null;
 
     const context = canvas?.getContext("2d") ?? null;
@@ -129,7 +143,7 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
       const height = Math.max(1, parent?.clientHeight ?? canvas.clientHeight);
       const ratio = Math.min(
         window.devicePixelRatio || 1,
-        MAX_DEVICE_PIXEL_RATIO,
+        isMobile ? 3 : MAX_DEVICE_PIXEL_RATIO,
       );
 
       canvas.width = Math.round(width * ratio);
@@ -192,73 +206,13 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
       rafId = window.requestAnimationFrame(tick);
     };
 
-    const stopMobileAutoplay = () => {
-      lastMobileTime = 0;
-
-      if (rafId) {
-        window.cancelAnimationFrame(rafId);
-        rafId = 0;
-      }
-    };
-
-    const mobileTick = (now: number) => {
-      if (disposed || reduced || mobileFinished) {
-        stopMobileAutoplay();
-        return;
-      }
-
-      if (!visible || document.visibilityState === "hidden") {
-        stopMobileAutoplay();
-        return;
-      }
-
-      if (lastMobileTime) {
-        mobileElapsed += now - lastMobileTime;
-      }
-
-      lastMobileTime = now;
-
-      const progress = Math.min(1, mobileElapsed / MOBILE_AUTOPLAY_MS);
-
-      applyProgress(progress);
-
-      if (progress >= 1) {
-        mobileFinished = true;
-        root.dataset.laptopAutoplayed = "true";
-        stopMobileAutoplay();
-        return;
-      }
-
-      rafId = window.requestAnimationFrame(mobileTick);
-    };
-
-    const startMobileAutoplay = () => {
-      if (
-        disposed ||
-        reduced ||
-        mobileFinished ||
-        rafId ||
-        !visible ||
-        document.visibilityState === "hidden"
-      ) {
-        return;
-      }
-
-      rafId = window.requestAnimationFrame(mobileTick);
-    };
-
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         stopLoop();
-        stopMobileAutoplay();
         return;
       }
 
-      if (mobileQuery.matches) {
-        startMobileAutoplay();
-      } else {
-        startLoop();
-      }
+      startLoop();
     };
 
     const onReducedMotionChange = (event: MediaQueryListEvent) => {
@@ -266,11 +220,8 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
 
       if (reduced) {
         stopLoop();
-        stopMobileAutoplay();
         targetProgress = 1;
         applyProgress(1);
-      } else if (mobileQuery.matches) {
-        startMobileAutoplay();
       } else {
         startLoop();
       }
@@ -278,22 +229,28 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
 
     root.dataset.laptopMode = frameList ? "frames" : "css";
     root.dataset.laptopReady = "true";
-    root.dataset.laptopAutoplay = mobileQuery.matches ? "true" : "false";
-    root.dataset.laptopAutoplayed = mobileFinished ? "true" : "false";
+    root.dataset.laptopAutoplay = "false";
+    root.dataset.laptopAutoplayed = "false";
+
+    if (frameList) {
+      root.dataset.laptopFrames = String(frameList.length);
+      root.dataset.laptopFrameSet = frameSet;
+    } else {
+      delete root.dataset.laptopFrames;
+      delete root.dataset.laptopFrameSet;
+      delete root.dataset.laptopFrame;
+    }
 
     if (reduced) {
       root.dataset.laptopPinned = "false";
       applyProgress(1);
-    } else if (mobileQuery.matches) {
-      root.dataset.laptopPinned = "false";
-      applyProgress(0);
     } else {
-      root.dataset.laptopPinned = "false";
+      root.dataset.laptopPinned = "true";
       applyProgress(0);
     }
 
     if (frameList) {
-      frameList.forEach((source, index) => {
+      frameList.forEach((source) => {
         const element = new Image();
         const frame: FrameImage = { element, ready: false };
 
@@ -310,7 +267,6 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
           element.dataset.failed = "true";
         };
         element.src = source;
-        root.dataset.laptopFrames = String(index + 1);
       });
     }
 
@@ -333,11 +289,8 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
 
               if (!visible) {
                 stopLoop();
-                stopMobileAutoplay();
               } else if (reduced) {
                 applyProgress(1);
-              } else if (mobileQuery.matches) {
-                startMobileAutoplay();
               } else {
                 startLoop();
               }
@@ -349,11 +302,7 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
     document.addEventListener("visibilitychange", onVisibilityChange);
     reduceQuery.addEventListener("change", onReducedMotionChange);
 
-    if (!reduced && mobileQuery.matches) {
-      startMobileAutoplay();
-    }
-
-    if (!reduced && !mobileQuery.matches) {
+    if (!reduced) {
       void (async () => {
         try {
           const [{ gsap }, { ScrollTrigger }] = await Promise.all([
@@ -391,6 +340,8 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
           root.dataset.laptopGsap = "true";
         } catch {
           root.dataset.laptopGsap = "failed";
+          targetProgress = 1;
+          applyProgress(1);
         }
       })();
     }
@@ -398,14 +349,13 @@ export function LaptopScrub({ frames, intro, mark, pinTarget }: LaptopScrubProps
     return () => {
       disposed = true;
       stopLoop();
-      stopMobileAutoplay();
       intersectionObserver?.disconnect();
       resizeObserver?.disconnect();
       document.removeEventListener("visibilitychange", onVisibilityChange);
       reduceQuery.removeEventListener("change", onReducedMotionChange);
       gsapContext?.revert();
     };
-  }, [frameList, pinTarget]);
+  }, [frameList, frameSet, isMobile, pinTarget]);
 
   return (
     <div

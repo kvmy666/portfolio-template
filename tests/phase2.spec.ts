@@ -1,4 +1,15 @@
+import siteJson from "../content/site.json";
 import { expect, test } from "./fixtures";
+
+type HeroMediaConfig = {
+  laptopFrames?: string[] | null;
+  laptopMobileFrames?: string[] | null;
+};
+
+const heroMedia = siteJson.hero as unknown as HeroMediaConfig;
+const mobileLaptopFrames = heroMedia.laptopMobileFrames ?? [];
+const expectedMobileLaptopMode =
+  mobileLaptopFrames.length > 0 ? "frames" : "css";
 
 function trackConsoleErrors(page: import("@playwright/test").Page) {
   const errors: string[] = [];
@@ -135,29 +146,70 @@ test("laptop scrub responds to desktop scroll", { tag: "@phase2" }, async ({
   expect(progress).toBeLessThanOrEqual(1);
 });
 
-test("laptop auto-plays once on mobile", { tag: "@phase2" }, async ({
+test("laptop scrub responds to mobile scroll", { tag: "@phase2" }, async ({
   page,
 }) => {
+  test.setTimeout(90_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "networkidle" });
 
   const visual = page.locator("[data-laptop-visual]");
-  await expect(visual).toBeVisible();
-  await expect(visual).toHaveAttribute("data-laptop-autoplay", "true");
-  await expect(visual).not.toHaveAttribute("data-laptop-gsap", "true");
+  await expect(visual).toBeVisible({ timeout: 20_000 });
+  await expect(visual).toHaveAttribute(
+    "data-laptop-mode",
+    expectedMobileLaptopMode,
+  );
+
+  if (expectedMobileLaptopMode === "frames") {
+    await expect(visual.locator("canvas.laptop-frame-canvas")).toBeVisible();
+    await expect(visual).toHaveAttribute("data-laptop-frame-set", "mobile");
+    await expect(visual).toHaveAttribute(
+      "data-laptop-frames",
+      String(mobileLaptopFrames.length),
+    );
+  }
+
+  await expect(visual).toHaveAttribute("data-laptop-gsap", "true");
+  await expect(visual).toHaveAttribute("data-laptop-pinned", "true");
 
   await page.evaluate(() => {
-    document.querySelector("#about")?.scrollIntoView({
-      block: "center",
-      behavior: "instant",
-    } as ScrollIntoViewOptions);
+    document.documentElement.style.scrollBehavior = "auto";
   });
 
-  // CI WebKit can need more than 4s for the lazy section + 1.8s autoplay to settle.
   await expect
-    .poll(() => readLaptopProgress(page), { timeout: 12000 })
-    .toBeGreaterThanOrEqual(0.99);
-  await expect(visual).toHaveAttribute("data-laptop-autoplayed", "true");
+    .poll(() => readLaptopProgress(page), { timeout: 20_000 })
+    .toBeLessThan(0.05);
+
+  const aboutTop = await page.locator("#about").evaluate((element) => {
+    return element.getBoundingClientRect().top + window.scrollY;
+  });
+
+  await page.evaluate((scrollTop) => {
+    window.scrollTo(0, scrollTop);
+    window.dispatchEvent(new Event("scroll"));
+  }, aboutTop + 500);
+
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 20_000 })
+    .toBeGreaterThan(0.15);
+
+  await page.evaluate((scrollTop) => {
+    window.scrollTo(0, scrollTop);
+    window.dispatchEvent(new Event("scroll"));
+  }, Math.max(0, aboutTop - 200));
+
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 20_000 })
+    .toBeLessThan(0.05);
+
+  await page.evaluate((scrollTop) => {
+    window.scrollTo(0, scrollTop);
+    window.dispatchEvent(new Event("scroll"));
+  }, aboutTop + 500);
+
+  await expect
+    .poll(() => readLaptopProgress(page), { timeout: 20_000 })
+    .toBeGreaterThan(0.15);
 });
 
 test("reduced motion opens the laptop statically", { tag: "@phase2" }, async ({

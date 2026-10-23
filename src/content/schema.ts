@@ -62,6 +62,15 @@ const HeroSchema = z.strictObject({
       z.string().trim().regex(/^\//, "Laptop frame paths must start with /"),
     )
     .nullable(),
+  laptopMobileFrames: z
+    .array(
+      z
+        .string()
+        .trim()
+        .regex(/^\//, "Laptop mobile frame paths must start with /"),
+    )
+    .nullable()
+    .optional(),
 });
 
 const AboutSchema = z.strictObject({
