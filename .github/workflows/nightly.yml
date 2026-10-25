@@ -29,19 +29,19 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-chromium-webkit-firefox
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-chromium-webkit
           restore-keys: |
-            playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-chromium-webkit-firefox
+            playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-chromium-webkit
             playwright-${{ runner.os }}-
       - run: npm ci --prefer-offline --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium webkit firefox
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run build
       - run: npm run size
+      # Headless Firefox on GitHub runners cannot create WebGL contexts; Chromium and WebKit cover the cross-browser matrix, matching the PR e2e workflow.
       - name: Functional and accessibility tests
         run: npx playwright test --grep-invert @fps --workers=3
         env:
           PLAYWRIGHT_SKIP_BUILD: "1"
-          PLAYWRIGHT_FIREFOX: "1"
       - name: Frame budget tests
         run: npx playwright test --project=chromium-desktop --grep @fps --workers=1
         env:
