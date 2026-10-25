@@ -72,40 +72,34 @@ function seriousViolations(
     }));
 }
 
-test("CV section opens a modal with the PDF preview and closes on Escape", { tag: "@phase4" }, async ({
+test("CV section opens the PDF in a new tab and offers PDF downloads", { tag: "@phase4" }, async ({
   page,
 }) => {
   test.setTimeout(60_000);
-  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
 
   const cvSection = page.locator("#cv");
   await cvSection.evaluate((el) =>
-    el.scrollIntoView({
-      block: "center",
-      behavior: "instant",
-    } as ScrollIntoViewOptions),
+    el.scrollIntoView({ block: "center", behavior: "instant" }),
   );
 
-  const trigger = cvSection.getByRole("button", { name: "View CV" });
-  await expect(trigger).toBeVisible();
-  await trigger.click();
+  const view = cvSection.getByRole("link", { name: "View CV" });
+  await expect(view).toBeVisible();
+  await expect(view).toHaveAttribute("href", "/demo/cv.pdf");
+  await expect(view).toHaveAttribute("target", "_blank");
+  await expect(view).toHaveAttribute("rel", /noopener/);
 
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  await expect(dialog).toHaveAttribute("aria-labelledby");
+  const pdf = cvSection.getByRole("link", { name: "Download PDF" });
+  await expect(pdf).toHaveAttribute("href", "/demo/cv.pdf");
+  await expect(pdf).toHaveAttribute("download", "");
 
-  const preview = dialog.getByTitle("CV preview");
-  await expect(preview).toHaveAttribute("src", "/demo/cv.pdf");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
   await expect(
-    dialog.getByRole("link", { name: "Download" }),
-  ).toBeVisible();
-
-  await page.keyboard.press("Escape");
-
-  await expect(dialog).not.toBeVisible();
-  await expect(trigger).toBeFocused();
+    cvSection.getByRole("link", { name: "Download Word" }),
+  ).toHaveCount(0);
 });
 
 test("contact form validates required fields and offers one label", { tag: "@phase4" }, async ({
@@ -331,44 +325,12 @@ test("Person JSON-LD is present and parses", { tag: "@phase4" }, async ({
   );
 });
 
-test("CV dialog is centered in the viewport", { tag: "@phase4" }, async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/", { waitUntil: "networkidle" });
-
-  const cvSection = page.locator("#cv");
-  await cvSection.scrollIntoViewIfNeeded();
-  await cvSection.getByRole("button", { name: "View CV" }).click();
-
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-
-  const viewport = page.viewportSize();
-  const box = await dialog.boundingBox();
-
-  expect(viewport).not.toBeNull();
-  expect(box).not.toBeNull();
-
-  const horizontalGap = Math.abs(
-    box!.x - (viewport!.width - box!.width - box!.x),
-  );
-  const verticalGap = Math.abs(
-    box!.y - (viewport!.height - box!.height - box!.y),
-  );
-
-  expect(horizontalGap).toBeLessThanOrEqual(2);
-  expect(verticalGap).toBeLessThanOrEqual(2);
-  expect(box!.width).toBeLessThanOrEqual(960);
-});
-
-test("contact section and CV modal have no critical or serious axe violations", { tag: "@a11y" }, async ({
+test("contact section and CV section have no critical or serious axe violations", { tag: "@a11y" }, async ({
   page,
 }) => {
   test.setTimeout(60_000);
-  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
 
   const contact = await openContact(page);
@@ -380,21 +342,9 @@ test("contact section and CV modal have no critical or serious axe violations", 
 
   expect(seriousViolations(contactResults.violations)).toEqual([]);
 
-  const cvSection = page.locator("#cv");
-  await cvSection.evaluate((el) =>
-    el.scrollIntoView({
-      block: "center",
-      behavior: "instant",
-    } as ScrollIntoViewOptions),
-  );
-  await cvSection.getByRole("button", { name: "View CV" }).click();
-
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-
-  const dialogResults = await new AxeBuilder({ page })
-    .include("dialog[open]")
+  const cvResults = await new AxeBuilder({ page })
+    .include("#cv")
     .analyze();
 
-  expect(seriousViolations(dialogResults.violations)).toEqual([]);
+  expect(seriousViolations(cvResults.violations)).toEqual([]);
 });

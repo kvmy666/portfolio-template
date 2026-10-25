@@ -13,6 +13,7 @@ import type {
 } from "@/content/schema";
 import { techSearchHref } from "@/lib/tech-search";
 import { AppFrame } from "./AppFrame";
+import { PdfIcon, WordIcon } from "./CvFileIcons";
 import { useLocale } from "./LocaleProvider";
 import { ProjectMetrics } from "./ProjectMetrics";
 
@@ -26,11 +27,6 @@ const ContactForm = dynamic(
 const LaptopScrub = dynamic(
   () => import("./LaptopScrub").then((module) => module.LaptopScrub),
   { ssr: false, loading: () => <LaptopScrubSkeleton /> },
-);
-
-const CVModal = dynamic(
-  () => import("./CVModal").then((module) => module.CVModal),
-  { ssr: false },
 );
 
 function ContactFormSkeleton() {
@@ -162,8 +158,6 @@ function PortfolioContent({
 }: Omit<PortfolioShellProps, "dictionaries">) {
   const { t, locale } = useLocale();
   const aboutSectionRef = useRef<HTMLElement>(null);
-  const cvTriggerRef = useRef<HTMLButtonElement>(null);
-  const [cvOpen, setCvOpen] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
@@ -190,9 +184,7 @@ function PortfolioContent({
   const heroPhoto = site.hero.photo ?? "/demo/avatar.svg";
   const showDemoPhotoCaption = site.hero.photo === null;
   const cvFile = features.cv ? site.cv.file : null;
-  const cvDownloadFile = features.cv
-    ? (site.cv.downloadFile ?? site.cv.file)
-    : null;
+  const cvWordFile = features.cv ? site.cv.downloadFile : null;
 
   const socialLinks = [
     site.links.github ? { href: site.links.github, label: "GitHub" } : null,
@@ -257,7 +249,9 @@ function PortfolioContent({
               </a>
               {cvFile ? (
                 <a
-                  href="#cv"
+                  href={cvFile}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center rounded-full px-5 py-3 text-sm font-semibold text-muted transition hover:text-primary-text"
                 >
                   {t.cv.request}
@@ -328,7 +322,9 @@ function PortfolioContent({
 
                 {cvFile ? (
                   <a
-                    href="#cv"
+                    href={cvFile}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-8 inline-flex w-fit rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast transition hover:-translate-y-0.5"
                   >
                     {t.cv.request}
@@ -519,31 +515,34 @@ function PortfolioContent({
               <h2>{t.cv.title}</h2>
               <p className="measure mt-4 text-muted">{t.cv.body}</p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <button
-                  ref={cvTriggerRef}
-                  type="button"
-                  onClick={() => setCvOpen(true)}
-                  aria-haspopup="dialog"
+                <a
+                  href={cvFile}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-contrast shadow-lg shadow-accent/20 transition hover:-translate-y-0.5"
                 >
                   {t.cv.view}
-                </button>
-                <a
-                  href={cvDownloadFile ?? cvFile}
-                  download
-                  className="inline-flex items-center rounded-full border border-line bg-background px-5 py-3 text-sm font-semibold transition hover:border-accent/40 hover:text-primary-text"
-                >
-                  {t.cv.download}
                 </a>
+                <span className="text-sm text-muted">{t.cv.download}:</span>
+                <a
+                  href={cvFile}
+                  download
+                  className="inline-flex items-center gap-2 rounded-full border border-line bg-background px-4 py-2.5 text-sm font-semibold transition hover:border-accent/40 hover:text-primary-text"
+                  aria-label={`${t.cv.download} PDF`}
+                >
+                  <PdfIcon /> <span aria-hidden="true">PDF</span>
+                </a>
+                {cvWordFile ? (
+                  <a
+                    href={cvWordFile}
+                    download
+                    className="inline-flex items-center gap-2 rounded-full border border-line bg-background px-4 py-2.5 text-sm font-semibold transition hover:border-accent/40 hover:text-primary-text"
+                    aria-label={`${t.cv.download} Word`}
+                  >
+                    <WordIcon /> <span aria-hidden="true">Word</span>
+                  </a>
+                ) : null}
               </div>
-              {cvOpen ? (
-                <CVModal
-                  file={cvFile}
-                  downloadFile={cvDownloadFile}
-                  triggerRef={cvTriggerRef}
-                  onClose={() => setCvOpen(false)}
-                />
-              ) : null}
             </div>
           </section>
         ) : null}
